@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ML 学习日志 | Yibo Wang</title>
+  <meta name="description" content="王艺博的机器学习学习日志 — 强化学习、具身智能、论文笔记" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d0f14;
+      --bg2: #13161e;
+      --bg3: #1a1e28;
+      --border: rgba(255,255,255,0.07);
+      --border-hover: rgba(255,255,255,0.15);
+      --text: #e8eaf0;
+      --text2: #9098ad;
+      --text3: #5a6278;
+      --accent: #34d399;
+      --accent2: #4f8ef7;
+      --accent3: #7b5cf0;
+      --accent4: #f59e0b;
+      --font-sans: 'Inter', 'Noto Sans SC', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-sans); background: var(--bg); color: var(--text); line-height: 1.7; overflow-x: hidden; }
+
+    /* Ambient */
+    .glow-blob { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; opacity: 0.1; }
+    .glow-blob.b1 { width: 500px; height: 500px; top: -100px; right: -100px; background: var(--accent); }
+    .glow-blob.b2 { width: 400px; height: 400px; bottom: 100px; left: -100px; background: var(--accent2); }
+
+    /* Nav */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 14px 0; background: rgba(13,15,20,0.85);
+      backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);
+    }
+    .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .nav-brand-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(52,211,153,0.15); border: 1px solid rgba(52,211,153,0.3); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .nav-brand-text { font-size: 15px; font-weight: 500; color: var(--text); }
+    .nav-brand-sub { font-size: 11px; color: var(--text3); font-family: var(--font-mono); }
+    .nav-right { display: flex; align-items: center; gap: 20px; }
+    .nav-right a { color: var(--text2); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+    .nav-right a:hover { color: var(--text); }
+    .nav-right .home-link { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text3); border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; text-decoration: none; transition: all 0.2s; }
+    .nav-right .home-link:hover { border-color: var(--accent2); color: var(--accent2); }
+
+    /* Layout */
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 90px 28px 60px; position: relative; z-index: 1; display: grid; grid-template-columns: 260px 1fr; gap: 48px; }
+
+    /* Sidebar */
+    .sidebar { position: sticky; top: 90px; height: fit-content; }
+    .sidebar-section { margin-bottom: 32px; }
+    .sidebar-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3); font-family: var(--font-mono); margin-bottom: 12px; }
+    .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 7px; cursor: pointer; transition: all 0.18s; font-size: 14px; color: var(--text2); text-decoration: none; margin-bottom: 2px; }
+    .sidebar-link:hover, .sidebar-link.active { background: var(--bg2); color: var(--text); }
+    .sidebar-link .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
+    .sidebar-link.active .dot { background: var(--accent); }
+    .sidebar-link .count { margin-left: auto; font-size: 11px; font-family: var(--font-mono); color: var(--text3); }
+    .tags-cloud { display: flex; flex-wrap: wrap; gap: 7px; }
+    .tag-chip { font-size: 11px; font-family: var(--font-mono); padding: 4px 10px; border-radius: 20px; background: var(--bg2); border: 1px solid var(--border); color: var(--text3); cursor: pointer; transition: all 0.2s; }
+    .tag-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Main content */
+    main {}
+
+    /* Blog header */
+    .blog-header { margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+    .blog-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .blog-title { font-size: 28px; font-weight: 600; letter-spacing: -0.8px; }
+    .new-post-btn { display: flex; align-items: center; gap: 8px; background: var(--accent); color: #0d0f14; border: none; border-radius: 8px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+    .new-post-btn:hover { transform: translateY(-1px); opacity: 0.9; }
+    .blog-desc { color: var(--text2); font-size: 15px; max-width: 560px; }
+    .stats-row { display: flex; gap: 32px; margin-top: 20px; }
+    .stat { text-align: center; }
+    .stat-n { font-size: 22px; font-weight: 600; font-family: var(--font-mono); }
+    .stat-l { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+    /* Filter bar */
+    .filter-bar { display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
+    .filter-btn { font-size: 13px; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; transition: all 0.2s; }
+    .filter-btn:hover { border-color: var(--border-hover); color: var(--text); }
+    .filter-btn.active { background: rgba(52,211,153,0.1); border-color: rgba(52,211,153,0.4); color: var(--accent); }
+
+    /* Post cards */
+    .post-list { display: flex; flex-direction: column; gap: 16px; }
+    .post-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 24px 28px; cursor: pointer;
+      transition: all 0.25s; position: relative; overflow: hidden;
+    }
+    .post-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; opacity: 0; transition: opacity 0.2s; }
+    .post-card.rl::after { background: linear-gradient(90deg, var(--accent2), var(--accent3)); }
+    .post-card.theory::after { background: linear-gradient(90deg, var(--accent3), var(--accent4)); }
+    .post-card.practice::after { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+    .post-card.paper::after { background: linear-gradient(90deg, var(--accent4), var(--accent)); }
+    .post-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+    .post-card:hover::after { opacity: 1; }
+    .post-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+    .post-date { font-family: var(--font-mono); font-size: 12px; color: var(--text3); }
+    .post-tag { font-size: 11px; font-family: var(--font-mono); padding: 2px 9px; border-radius: 4px; }
+    .post-tag.rl { background: rgba(79,142,247,0.1); color: var(--accent2); }
+    .post-tag.theory { background: rgba(123,92,240,0.1); color: var(--accent3); }
+    .post-tag.practice { background: rgba(52,211,153,0.1); color: var(--accent); }
+    .post-tag.paper { background: rgba(245,158,11,0.1); color: var(--accent4); }
+    .post-title { font-size: 18px; font-weight: 500; margin-bottom: 8px; line-height: 1.4; }
+    .post-summary { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 16px; }
+    .post-footer { display: flex; align-items: center; justify-content: space-between; }
+    .post-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .post-chip { font-size: 11px; color: var(--text3); background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; }
+    .read-more { font-size: 13px; color: var(--accent); font-weight: 500; display: flex; align-items: center; gap: 4px; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 60px 20px; }
+    .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-title { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
+    .empty-desc { font-size: 14px; color: var(--text2); }
+
+    /* Post Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+      display: none; align-items: flex-start; justify-content: center;
+      padding: 60px 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--bg2); border: 1px solid var(--border-hover);
+      border-radius: 16px; padding: 40px; max-width: 720px; width: 100%;
+      max-height: 80vh; overflow-y: auto; position: relative;
+    }
+    .modal-close { position: absolute; top: 20px; right: 20px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; color: var(--text2); cursor: pointer; font-size: 14px; }
+    .modal-close:hover { color: var(--text); }
+    .modal h2 { font-size: 24px; font-weight: 600; margin-bottom: 12px; line-height: 1.3; }
+    .modal-meta { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+    .modal-content { font-size: 15px; line-height: 1.9; color: var(--text2); }
+    .modal-content h3 { font-size: 17px; font-weight: 500; color: var(--text); margin: 24px 0 10px; }
+    .modal-content p { margin-bottom: 14px; }
+    .modal-content code { font-family: var(--font-mono); font-size: 13px; background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; color: var(--accent); }
+    .modal-content pre { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin: 14px 0; overflow-x: auto; }
+    .modal-content pre code { background: none; border: none; padding: 0; font-size: 13px; color: var(--text); }
+    .modal-content ul, .modal-content ol { padding-left: 24px; margin-bottom: 14px; }
+    .modal-content li { margin-bottom: 6px; }
+    .modal-content .highlight { background: rgba(52,211,153,0.08); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 14px 0; }
+
+    /* New post form */
+    .new-post-form { display: none; background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 28px; margin-bottom: 24px; }
+    .new-post-form.open { display: block; }
+    .form-title { font-size: 16px; font-weight: 500; margin-bottom: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { font-size: 13px; color: var(--text2); margin-bottom: 6px; display: block; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px; color: var(--text); font-family: var(--font-sans);
+      font-size: 14px; outline: none; transition: border-color 0.2s; resize: vertical;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent); }
+    .form-group textarea { min-height: 180px; }
+    .form-actions { display: flex; gap: 12px; justify-content: flex-end; }
+    .btn-cancel { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); padding: 9px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+    .btn-cancel:hover { color: var(--text); }
+    .btn-save { background: var(--accent); border: none; color: #0d0f14; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
+    .btn-save:hover { opacity: 0.9; }
+
+    @media (max-width: 768px) {
+      .page-wrap { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-blob b1"></div>
+  <div class="glow-blob b2"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a class="nav-brand" href="./index.html">
+        <div class="nav-brand-icon">📔</div>
+        <div>
+          <div class="nav-brand-text">ML 学习日志</div>
+          <div class="nav-brand-sub">my-MachineLearning-journal</div>
+        </div>
+      </a>
+      <div class="nav-right">
+        <a href="#" onclick="toggleNewPost(event)">写日志</a>
+        <a href="#" onclick="filterPosts('all', this)">全部</a>
+        <a href="../index.html" class="home-link">← 返回主页</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-wrap">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">分类</div>
+        <a class="sidebar-link active" onclick="filterPosts('all', this)">
+          <span class="dot"></span>全部日志<span class="count" id="count-all">0</span>
+        </a>
+        <a class="sidebar-link" onclick="filterPosts('rl', this)">
+          <span class="dot"></span>强化学习<span class="count" id="count-rl">0</span>
+        </a>
+        <a class="sidebar-link" onclick="filterPosts('theory', this)">
+          <span class="dot"></span>理论笔记<span class="count" id="count-theory">0</span>
+        </a>
+        <a class="sidebar-link" onclick="filterPosts('practice', this)">
+          <span class="dot"></span>实战记录<span class="count" id="count-practice">0</span>
+        </a>
+        <a class="sidebar-link" onclick="filterPosts('paper', this)">
+          <span class="dot"></span>论文阅读<span class="count" id="count-paper">0</span>
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">常用标签</div>
+        <div class="tags-cloud" id="tags-cloud"></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">关于此博客</div>
+        <p style="font-size:13px;color:var(--text3);line-height:1.7;">记录机器学习与具身智能的学习历程、踩坑笔记和论文心得。持续更新中。</p>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main>
+      <div class="blog-header">
+        <div class="blog-header-top">
+          <div class="blog-title">学习日志</div>
+          <a href="#" onclick="toggleNewPost(event)" class="new-post-btn">+ 写新日志</a>
+        </div>
+        <p class="blog-desc">记录机器学习与强化学习的学习历程、具身智能研究中的技术探索与踩坑笔记。</p>
+        <div class="stats-row">
+          <div class="stat"><div class="stat-n" id="total-posts">0</div><div class="stat-l">篇日志</div></div>
+          <div class="stat"><div class="stat-n" id="total-tags">0</div><div class="stat-l">个话题</div></div>
+          <div class="stat"><div class="stat-n" id="last-update">—</div><div class="stat-l">最近更新</div></div>
+        </div>
+      </div>
+
+      <!-- New post form -->
+      <div class="new-post-form" id="new-post-form">
+        <div class="form-title">✍️ 写新日志</div>
+        <div class="form-group">
+          <label>标题</label>
+          <input type="text" id="form-title" placeholder="今天学了什么？" />
+        </div>
+        <div class="form-group">
+          <label>分类</label>
+          <select id="form-category">
+            <option value="rl">强化学习</option>
+            <option value="theory">理论笔记</option>
+            <option value="practice">实战记录</option>
+            <option value="paper">论文阅读</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>标签（逗号分隔）</label>
+          <input type="text" id="form-tags" placeholder="例如：PPO, IsaacGym, reward design" />
+        </div>
+        <div class="form-group">
+          <label>内容（支持 Markdown 语法）</label>
+          <textarea id="form-content" placeholder="## 今天的收获&#10;&#10;记录你的学习内容、代码片段、心得体会..."></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn-cancel" onclick="toggleNewPost(event)">取消</button>
+          <button class="btn-save" onclick="savePost()">保存日志</button>
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterPosts('all', this)">全部</button>
+        <button class="filter-btn" onclick="filterPosts('rl', this)">强化学习</button>
+        <button class="filter-btn" onclick="filterPosts('theory', this)">理论笔记</button>
+        <button class="filter-btn" onclick="filterPosts('practice', this)">实战记录</button>
+        <button class="filter-btn" onclick="filterPosts('paper', this)">论文阅读</button>
+      </div>
+
+      <!-- Post list -->
+      <div class="post-list" id="post-list"></div>
+    </main>
+  </div>
+
+  <!-- Post modal -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" id="modal-content">
+      <button class="modal-close" onclick="closeModal()">关闭 ✕</button>
+      <div id="modal-inner"></div>
+    </div>
+  </div>
+
+  <script>
+    // ── Default posts data ──
+    const DEFAULT_POSTS = [
+      {
+        id: 1,
+        title: "IsaacGym 环境搭建：从零开始的踩坑记录",
+        category: "practice",
+        date: "2026-06-15",
+        summary: "记录在 Ubuntu 24.04 + RTX 3050 上搭建 IsaacGym 环境的全过程，包括 Conda 依赖冲突解决、LD_LIBRARY_PATH 设置以及 GPU 渲染问题排查。",
+        tags: ["IsaacGym", "Ubuntu", "环境配置", "CUDA"],
+        content: `## 环境信息
+
+- OS: Ubuntu 24.04 LTS
+- GPU: RTX 3050 + Intel Iris Xe (双显卡)
+- Conda 环境: \`dg\` (Python 3.8)
+- 关键依赖: \`numpy\`, \`torch\`, \`rsl_rl\`, \`unitree_rl_gym\`
+
+## 踩坑 1：LD_LIBRARY_PATH 问题
+
+IsaacGym 运行时需要手动设置 Conda 的库路径，否则会报找不到 \`libpython3.8.so\` 的错误：
+
+\`\`\`bash
+export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+\`\`\`
+
+建议写到 \`~/.bashrc\` 里，但注意切换环境后需要重新 source。
+
+## 踩坑 2：双 GPU 渲染冲突
+
+RTX 3050 + Intel Iris Xe 在 IsaacGym GUI 模式下会发生渲染冲突。解决方案是强制使用 Intel 核显：
+
+\`\`\`bash
+__NV_PRIME_RENDER_OFFLOAD=0 __GLX_VENDOR_LIBRARY_NAME=intel python train.py
+\`\`\`
+
+## 结论
+
+headless 模式（加 \`--headless\` 参数）训练时不存在 GPU 渲染冲突，推荐在正式训练时使用 headless。`
+      },
+      {
+        id: 2,
+        title: "PPO 算法深度解析：从理论到 rsl_rl 实现",
+        category: "theory",
+        date: "2026-06-10",
+        summary: "深入理解 Proximal Policy Optimization（PPO）算法的核心机制，结合 rsl_rl 库的具体实现，分析 clip ratio、GAE 优势估计和 entropy bonus 的作用。",
+        tags: ["PPO", "强化学习", "rsl_rl", "策略梯度"],
+        content: `## PPO 的核心思想
+
+PPO 是目前机器人强化学习中最常用的算法之一，核心思想是通过**截断（clipping）**来约束策略更新步长，避免更新过大导致训练不稳定。
+
+## Clip Objective
+
+\`\`\`python
+ratio = pi(a|s) / pi_old(a|s)
+L_clip = min(ratio * A, clip(ratio, 1-eps, 1+eps) * A)
+\`\`\`
+
+其中 \`eps\` 通常设为 0.2。
+
+## GAE 优势估计
+
+Generalized Advantage Estimation (GAE) 通过引入 \`lambda\` 参数平衡偏差和方差：
+
+- \`lambda = 0\`：一步 TD，低方差高偏差
+- \`lambda = 1\`：Monte Carlo，高方差低偏差
+- rsl_rl 默认 \`lambda = 0.95\`
+
+## 在 IsaacGym 中的体会
+
+并行环境数量（\`num_envs\`）是影响样本效率的关键参数。4096 个并行环境下，一次 rollout 就能收集大量样本，显著加速训练。`
+      },
+      {
+        id: 3,
+        title: "Curriculum Learning 在抛球任务中的设计与调优",
+        category: "rl",
+        date: "2026-06-05",
+        summary: "记录 B2Z1 精准抛球任务中 curriculum learning 的设计思路：从近距离逐步扩展至 8m 目标，以及 MinDist 参数调整对训练稳定性的影响。",
+        tags: ["Curriculum Learning", "B2Z1", "IsaacGym", "奖励函数"],
+        content: `## 问题背景
+
+在 \`b2z1_throw_precise.py\` 中，训练到 5m 距离就陷入瓶颈，无法继续晋级。经分析，主要问题有：
+
+1. **target_reward 设计问题**：原来对所有目标帧都发奖励，导致多目标干扰
+2. **投掷插值时间过短**：影响抛球质量
+3. **robot_base_pos 未更新**：导致 curriculum 距离计算偏差
+
+## 修复方案
+
+### 1. target_reward 只奖励最近目标帧
+
+\`\`\`python
+# Before: 对所有目标帧发奖励
+# After: 只对最近目标帧发奖励
+nearest_target_idx = torch.argmin(dist_to_targets, dim=-1)
+target_reward = reach_goal_bonus[nearest_target_idx]
+\`\`\`
+
+### 2. MinDist 参数调整
+
+从 UR5e 的经验迁移：将 MinDist 从 8.0 改为 4.0，训练范围扩展至 4m-8m，避免 curriculum 过拟合近距离。
+
+## KF_JOINT6_TARGET 对齐
+
+将 \`KF_JOINT6_TARGET\` 设为 3.3（与 \`handball_throw_fixed.py\` 对齐），释放关节活动范围，改善抛球姿态。`
+      },
+      {
+        id: 4,
+        title: "论文阅读：《Learning to Walk in Minutes Using Massively Parallel Deep RL》",
+        category: "paper",
+        date: "2026-05-28",
+        summary: "阅读 NVIDIA 的 legged robot locomotion 经典论文，理解 massively parallel simulation 在足式机器人训练中的作用，以及其与 B2Z1 Locomotion Teacher 的关联。",
+        tags: ["论文", "Locomotion", "并行仿真", "足式机器人"],
+        content: `## 论文概述
+
+**标题**：Learning to Walk in Minutes Using Massively Parallel Deep Reinforcement Learning  
+**作者**：Rudin et al. (NVIDIA, ETH Zurich)  
+**贡献**：通过大规模并行仿真（4096 environments），在几分钟内训练出能在真实四足机器人上迁移的运动策略。
+
+## 核心技术
+
+### 1. Massively Parallel Simulation
+利用 IsaacGym 的 GPU 并行能力同时运行 4096 个仿真环境，数据收集速度比 CPU 仿真快 1000 倍以上。
+
+### 2. Observation Space 设计
+- Base angular velocity × 0.25
+- Projected gravity
+- Commands (vx, vy, omega)
+- Joint position error × 1.0
+- Joint velocity × 0.05
+- Previous actions
+
+与我们的 B2Z1 (45维) 和 G1 (47维) 观测空间设计高度吻合。
+
+### 3. Curriculum 设计
+通过自适应 curriculum 动态调整地形难度，让策略逐渐学会在复杂地形上行走。
+
+## 与 B2Z1 的对比
+
+| 项目 | 论文 | B2Z1 |
+|------|------|-------|
+| 观测维度 | 45 | 45 |
+| 动作维度 | 12 | 11 (移除 j5) |
+| vx max | 1.0 m/s | 2.0 m/s |
+
+## 感悟
+
+大规模并行仿真确实是当前足式机器人 RL 的主流范式，IsaacGym 的作用不可替代。`
+      }
+    ];
+
+    // ── State ──
+    let currentFilter = 'all';
+    let posts = [];
+
+    function loadPosts() {
+      const saved = localStorage.getItem('ml_journal_posts');
+      if (saved) {
+        try { posts = JSON.parse(saved); }
+        catch { posts = [...DEFAULT_POSTS]; }
+      } else {
+        posts = [...DEFAULT_POSTS];
+      }
+    }
+
+    function savePosts() {
+      localStorage.setItem('ml_journal_posts', JSON.stringify(posts));
+    }
+
+    // ── Render ──
+    function renderPosts() {
+      const list = document.getElementById('post-list');
+      const filtered = currentFilter === 'all' ? posts : posts.filter(p => p.category === currentFilter);
+      
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-title">还没有日志</div><div class="empty-desc">点击"写新日志"开始记录你的学习旅程</div></div>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map(p => `
+        <div class="post-card ${p.category}" onclick="openPost(${p.id})">
+          <div class="post-meta">
+            <span class="post-date">${p.date}</span>
+            <span class="post-tag ${p.category}">${categoryLabel(p.category)}</span>
+          </div>
+          <div class="post-title">${escHtml(p.title)}</div>
+          <div class="post-summary">${escHtml(p.summary)}</div>
+          <div class="post-footer">
+            <div class="post-tags">${p.tags.slice(0,4).map(t => `<span class="post-chip">${escHtml(t)}</span>`).join('')}</div>
+            <span class="read-more">阅读全文 →</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderStats() {
+      document.getElementById('total-posts').textContent = posts.length;
+      const allTags = new Set(posts.flatMap(p => p.tags));
+      document.getElementById('total-tags').textContent = allTags.size;
+      const dates = posts.map(p => p.date).sort().reverse();
+      document.getElementById('last-update').textContent = dates[0] ? dates[0].slice(5) : '—';
+
+      const counts = { all: posts.length, rl: 0, theory: 0, practice: 0, paper: 0 };
+      posts.forEach(p => { if (counts[p.category] !== undefined) counts[p.category]++; });
+      Object.keys(counts).forEach(k => {
+        const el = document.getElementById('count-' + k);
+        if (el) el.textContent = counts[k];
+      });
+    }
+
+    function renderTagsCloud() {
+      const tagCount = {};
+      posts.forEach(p => p.tags.forEach(t => tagCount[t] = (tagCount[t] || 0) + 1));
+      const sorted = Object.entries(tagCount).sort((a,b) => b[1]-a[1]).slice(0, 20);
+      const cloud = document.getElementById('tags-cloud');
+      cloud.innerHTML = sorted.map(([t]) => `<span class="tag-chip" onclick="searchTag('${escHtml(t)}')">${escHtml(t)}</span>`).join('');
+    }
+
+    function categoryLabel(cat) {
+      return { rl: '强化学习', theory: '理论笔记', practice: '实战记录', paper: '论文阅读' }[cat] || cat;
+    }
+
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Filter ──
+    function filterPosts(cat, el) {
+      currentFilter = cat;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
+      if (el) {
+        el.classList.add('active');
+        const sideEl = document.querySelector(`.sidebar-link[onclick*="'${cat}'"]`);
+        if (sideEl) sideEl.classList.add('active');
+      }
+      renderPosts();
+      return false;
+    }
+
+    // ── Post modal ──
+    function openPost(id) {
+      const p = posts.find(x => x.id === id);
+      if (!p) return;
+      const content = renderMarkdown(p.content);
+      document.getElementById('modal-inner').innerHTML = `
+        <h2>${escHtml(p.title)}</h2>
+        <div class="modal-meta">
+          <span class="post-date">${p.date}</span>
+          <span class="post-tag ${p.category}">${categoryLabel(p.category)}</span>
+          ${p.tags.map(t => `<span class="post-chip">${escHtml(t)}</span>`).join('')}
+        </div>
+        <div class="modal-content">${content}</div>
+      `;
+      document.getElementById('modal-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(e) {
+      if (e && e.target !== document.getElementById('modal-overlay') && !e.target.classList.contains('modal-close')) return;
+      document.getElementById('modal-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    // Simple markdown renderer
+    function renderMarkdown(md) {
+      return md
+        .replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => `<pre><code>${escHtml(code.trim())}</code></pre>`)
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^### (.+)$/gm, '<h3 style="font-size:15px">$1</h3>')
+        .replace(/^\*\*(.+)\*\*$/gm, '<strong>$1</strong>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text)">$1</strong>')
+        .replace(/^> (.+)$/gm, '<div class="highlight">$1</div>')
+        .replace(/^- (.+)$/gm, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/^(?!<[hup]|<li|<pre|<div)(.+)$/gm, (m) => m.trim() ? m : '')
+        .replace(/^(<h[23]>|<pre>|<ul>|<div class="highlight">)/, '$1')
+        .replace(/\n/g, '<br>');
+    }
+
+    // ── New post ──
+    function toggleNewPost(e) {
+      if (e) e.preventDefault();
+      const form = document.getElementById('new-post-form');
+      form.classList.toggle('open');
+      if (form.classList.contains('open')) {
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function savePost() {
+      const title = document.getElementById('form-title').value.trim();
+      const category = document.getElementById('form-category').value;
+      const tagsRaw = document.getElementById('form-tags').value;
+      const content = document.getElementById('form-content').value.trim();
+
+      if (!title || !content) { alert('请填写标题和内容'); return; }
+
+      const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+      const today = new Date().toISOString().slice(0, 10);
+      const summary = content.replace(/```[\s\S]*?```/g, '').replace(/[#*`>\-]/g, '').trim().slice(0, 120) + '...';
+
+      const newPost = {
+        id: Date.now(),
+        title, category, date: today,
+        summary: summary || content.slice(0, 120) + '...',
+        tags: tags.length ? tags : ['笔记'],
+        content
+      };
+
+      posts.unshift(newPost);
+      savePosts();
+      renderAll();
+      document.getElementById('new-post-form').classList.remove('open');
+      document.getElementById('form-title').value = '';
+      document.getElementById('form-tags').value = '';
+      document.getElementById('form-content').value = '';
+    }
+
+    function searchTag(tag) {
+      // Future: filter by tag
+    }
+
+    function renderAll() {
+      renderStats();
+      renderPosts();
+      renderTagsCloud();
+    }
+
+    // ── Init ──
+    loadPosts();
+    renderAll();
+  </script>
+</body>
+</html>

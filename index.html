@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>王艺博 | Yibo Wang</title>
+  <meta name="description" content="王艺博 — 上海交通大学具身智能与机器人强化学习研究生" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d0f14;
+      --bg2: #13161e;
+      --bg3: #1a1e28;
+      --border: rgba(255,255,255,0.07);
+      --border-hover: rgba(255,255,255,0.15);
+      --text: #e8eaf0;
+      --text2: #9098ad;
+      --text3: #5a6278;
+      --accent: #4f8ef7;
+      --accent2: #7b5cf0;
+      --accent3: #34d399;
+      --accent4: #f59e0b;
+      --red: #f87171;
+      --font-sans: 'Inter', 'Noto Sans SC', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ---- Noise texture overlay ---- */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    /* ---- Ambient glow blobs ---- */
+    .glow-blob {
+      position: fixed; border-radius: 50%; filter: blur(120px);
+      pointer-events: none; z-index: 0; opacity: 0.12;
+    }
+    .glow-blob.b1 { width: 600px; height: 600px; top: -200px; left: -100px; background: var(--accent2); }
+    .glow-blob.b2 { width: 500px; height: 500px; top: 40%; right: -150px; background: var(--accent); }
+    .glow-blob.b3 { width: 400px; height: 400px; bottom: 0; left: 30%; background: var(--accent3); opacity: 0.07; }
+
+    /* ---- Layout ---- */
+    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+    /* ---- Nav ---- */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 16px 0;
+      border-bottom: 1px solid transparent;
+      transition: all 0.3s;
+    }
+    nav.scrolled {
+      background: rgba(13,15,20,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom-color: var(--border);
+    }
+    .nav-inner {
+      max-width: 900px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: var(--font-mono); font-size: 15px; font-weight: 500;
+      color: var(--text); text-decoration: none; letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a {
+      color: var(--text2); text-decoration: none; font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ---- Hero ---- */
+    #hero {
+      min-height: 100vh; display: flex; align-items: center;
+      padding: 120px 0 80px;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--font-mono); font-size: 12px; color: var(--accent);
+      border: 1px solid rgba(79,142,247,0.25); border-radius: 100px;
+      padding: 5px 14px; margin-bottom: 28px;
+      background: rgba(79,142,247,0.05);
+    }
+    .hero-tag::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent3); animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    h1 {
+      font-size: clamp(40px, 6vw, 72px); font-weight: 600;
+      line-height: 1.1; letter-spacing: -2px; margin-bottom: 8px;
+    }
+    h1 .en { display: block; font-size: 0.55em; color: var(--text2); letter-spacing: -0.5px; font-weight: 300; }
+    .hero-subtitle {
+      font-size: 18px; color: var(--text2); margin: 24px 0 40px;
+      max-width: 520px; line-height: 1.6;
+    }
+    .hero-subtitle strong { color: var(--text); font-weight: 500; }
+    .hero-cta { display: flex; gap: 16px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 22px; border-radius: 8px; font-size: 14px; font-weight: 500;
+      text-decoration: none; transition: all 0.2s; cursor: pointer; border: none;
+    }
+    .btn-primary {
+      background: var(--accent); color: #fff;
+    }
+    .btn-primary:hover { background: #3a7de8; transform: translateY(-1px); }
+    .btn-outline {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border-hover);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .hero-stats {
+      display: flex; gap: 48px; margin-top: 72px; padding-top: 40px;
+      border-top: 1px solid var(--border);
+    }
+    .stat-num { font-size: 32px; font-weight: 600; color: var(--text); letter-spacing: -1px; }
+    .stat-label { font-size: 13px; color: var(--text3); margin-top: 4px; }
+
+    /* ---- Section common ---- */
+    section { padding: 100px 0; }
+    .section-label {
+      font-family: var(--font-mono); font-size: 12px; color: var(--accent);
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: 36px; font-weight: 600; letter-spacing: -1px; margin-bottom: 48px;
+    }
+
+    /* ---- About ---- */
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+    .about-text p { color: var(--text2); font-size: 15px; line-height: 1.8; margin-bottom: 16px; }
+    .about-text p strong { color: var(--text); }
+    .info-list { display: flex; flex-direction: column; gap: 14px; }
+    .info-item { display: flex; align-items: center; gap: 14px; }
+    .info-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+    .info-icon.blue { background: rgba(79,142,247,0.1); }
+    .info-icon.purple { background: rgba(123,92,240,0.1); }
+    .info-icon.green { background: rgba(52,211,153,0.1); }
+    .info-icon.amber { background: rgba(245,158,11,0.1); }
+    .info-text { font-size: 14px; }
+    .info-text .label { color: var(--text3); font-size: 12px; }
+    .info-text .value { color: var(--text); font-weight: 500; }
+
+    /* ---- Research ---- */
+    .research-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .research-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 28px;
+      transition: all 0.3s; position: relative; overflow: hidden;
+    }
+    .research-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .research-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+    .research-card:hover::before { opacity: 1; }
+    .card-icon { font-size: 28px; margin-bottom: 16px; }
+    .card-title { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+    .card-desc { font-size: 14px; color: var(--text2); line-height: 1.7; }
+    .card-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+    .tag {
+      font-size: 11px; font-family: var(--font-mono); color: var(--text3);
+      border: 1px solid var(--border); border-radius: 4px; padding: 3px 8px;
+    }
+
+    /* ---- Skills ---- */
+    .skills-wrapper { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .skill-group { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+    .skill-group-title { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
+    .skill-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .skill-name { font-size: 14px; color: var(--text); }
+    .skill-bar { width: 80px; height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
+    .skill-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 1s ease; }
+
+    /* ---- Publications / Projects ---- */
+    .pub-list { display: flex; flex-direction: column; gap: 16px; }
+    .pub-item {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px 28px;
+      display: flex; gap: 20px; align-items: flex-start;
+      transition: border-color 0.2s;
+    }
+    .pub-item:hover { border-color: var(--border-hover); }
+    .pub-num { font-family: var(--font-mono); font-size: 13px; color: var(--text3); min-width: 28px; padding-top: 2px; }
+    .pub-content {}
+    .pub-title { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+    .pub-authors { font-size: 13px; color: var(--text2); margin-bottom: 4px; }
+    .pub-venue { font-size: 12px; font-family: var(--font-mono); color: var(--accent); }
+    .pub-status { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-left: 8px; }
+    .pub-status.wip { background: rgba(245,158,11,0.1); color: var(--accent4); }
+    .pub-status.submitted { background: rgba(79,142,247,0.1); color: var(--accent); }
+
+    /* ---- Experience / Timeline ---- */
+    .timeline { position: relative; padding-left: 28px; }
+    .timeline::before {
+      content: ''; position: absolute; left: 0; top: 8px; bottom: 0;
+      width: 1px; background: var(--border);
+    }
+    .tl-item { position: relative; margin-bottom: 40px; }
+    .tl-dot {
+      position: absolute; left: -33px; top: 6px;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--accent); border: 2px solid var(--bg);
+    }
+    .tl-period { font-family: var(--font-mono); font-size: 12px; color: var(--text3); margin-bottom: 6px; }
+    .tl-title { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
+    .tl-org { font-size: 14px; color: var(--accent); margin-bottom: 10px; }
+    .tl-desc { font-size: 14px; color: var(--text2); line-height: 1.7; }
+
+    /* ---- Portfolio Cards (including blog) ---- */
+    #projects .section-title { margin-bottom: 20px; }
+    .project-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .project-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 28px; text-decoration: none; color: inherit;
+      display: block; transition: all 0.3s; position: relative; overflow: hidden;
+    }
+    .project-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+    .project-card .badge {
+      display: inline-block; font-size: 11px; font-family: var(--font-mono);
+      padding: 3px 10px; border-radius: 20px; margin-bottom: 14px;
+    }
+    .badge.rl { background: rgba(79,142,247,0.1); color: var(--accent); }
+    .badge.blog { background: rgba(52,211,153,0.1); color: var(--accent3); }
+    .badge.robot { background: rgba(123,92,240,0.1); color: var(--accent2); }
+    .badge.sim { background: rgba(245,158,11,0.1); color: var(--accent4); }
+    .project-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 10px; }
+    .project-card p { font-size: 14px; color: var(--text2); line-height: 1.7; }
+    .project-card .arrow {
+      position: absolute; right: 24px; top: 50%; transform: translateY(-50%);
+      font-size: 18px; color: var(--text3); transition: all 0.2s; opacity: 0;
+    }
+    .project-card:hover .arrow { opacity: 1; right: 20px; color: var(--accent); }
+
+    /* ---- Contact ---- */
+    #contact { padding-bottom: 120px; }
+    .contact-box {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 60px; text-align: center;
+    }
+    .contact-box h2 { font-size: 36px; font-weight: 600; margin-bottom: 16px; letter-spacing: -1px; }
+    .contact-box p { color: var(--text2); max-width: 480px; margin: 0 auto 40px; }
+    .contact-links { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+    .contact-link {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 20px; text-decoration: none;
+      color: var(--text); font-size: 14px; transition: all 0.2s;
+    }
+    .contact-link:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+    .contact-link svg { width: 18px; height: 18px; }
+
+    /* ---- Footer ---- */
+    footer {
+      border-top: 1px solid var(--border); padding: 28px 0;
+      text-align: center; color: var(--text3); font-size: 13px;
+    }
+    footer a { color: var(--text3); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    /* ---- Scroll animations ---- */
+    .fade-up { opacity: 0; transform: translateY(24px); transition: all 0.6s ease; }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 768px) {
+      .about-grid, .research-grid, .project-grid, .skills-wrapper { grid-template-columns: 1fr; }
+      .hero-stats { flex-wrap: wrap; gap: 24px; }
+      .contact-box { padding: 40px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-blob b1"></div>
+  <div class="glow-blob b2"></div>
+  <div class="glow-blob b3"></div>
+
+  <!-- NAV -->
+  <nav id="main-nav">
+    <div class="nav-inner">
+      <a class="nav-logo" href="#hero">wyb<span>.</span></a>
+      <div class="nav-links">
+        <a href="#about">About</a>
+        <a href="#research">Research</a>
+        <a href="#projects">Projects</a>
+        <a href="#experience">Experience</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="container">
+      <div class="hero-tag">Robotics & Reinforcement Learning</div>
+      <h1>
+        王艺博
+        <span class="en">Yibo Wang</span>
+      </h1>
+      <p class="hero-subtitle">
+        <strong>具身智能</strong>研究生 @ 上海交通大学 &nbsp;·&nbsp; 专注于机器人强化学习、
+        多智能体协作与灵巧手操控任务
+      </p>
+      <div class="hero-cta">
+        <a href="#research" class="btn btn-primary">查看研究</a>
+        <a href="./my-MachineLearning-journal/index.html" class="btn btn-outline">ML 学习日志 →</a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="stat-num">3</div>
+          <div class="stat-label">研究方向</div>
+        </div>
+        <div>
+          <div class="stat-num">IsaacGym</div>
+          <div class="stat-label">主要训练框架</div>
+        </div>
+        <div>
+          <div class="stat-num">B2Z1</div>
+          <div class="stat-label">主力机器人平台</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="container fade-up">
+      <div class="section-label">// about me</div>
+      <div class="section-title">关于我</div>
+      <div class="about-grid">
+        <div class="about-text">
+          <p>我是王艺博，就读于<strong>上海交通大学</strong>，研究方向为<strong>具身智能与机器人强化学习</strong>。我在导师指导下深入探索多智能体协作基准、足式运动控制和灵巧手操控任务。</p>
+          <p>我的研究聚焦于让机器人在复杂动态环境中习得高质量运动策略——从四足机器人 B2Z1 的 Locomotion Teacher，到 UR5e 机械臂与 RH56DFX 灵巧手的精准抛球任务。</p>
+          <p>在技术栈上，我熟练使用 <strong>IsaacGym</strong>、<strong>PyTorch</strong>、<strong>rsl_rl</strong> 进行策略训练，并对 curriculum learning 和奖励函数设计有较深的理解。</p>
+        </div>
+        <div>
+          <div class="info-list">
+            <div class="info-item">
+              <div class="info-icon blue">🎓</div>
+              <div class="info-text">
+                <div class="label">学校</div>
+                <div class="value">上海交通大学</div>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon purple">🤖</div>
+              <div class="info-text">
+                <div class="label">研究方向</div>
+                <div class="value">具身智能 · 机器人强化学习</div>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon green">⚙️</div>
+              <div class="info-text">
+                <div class="label">主要框架</div>
+                <div class="value">IsaacGym · PyTorch · rsl_rl</div>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon amber">📧</div>
+              <div class="info-text">
+                <div class="label">邮箱</div>
+                <div class="value">13937562298@sjtu.edu.cn</div>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon blue">💻</div>
+              <div class="info-text">
+                <div class="label">平台</div>
+                <div class="value">Ubuntu 24.04 · RTX 3050 · Conda dg</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESEARCH -->
+  <section id="research">
+    <div class="container fade-up">
+      <div class="section-label">// research</div>
+      <div class="section-title">研究方向</div>
+      <div class="research-grid">
+        <div class="research-card">
+          <div class="card-icon">🏆</div>
+          <div class="card-title">Dynamic Dexterity Arena</div>
+          <div class="card-desc">多智能体协作强化学习基准，包含 handball throwing 等任务及其变体，探索灵巧手在动态环境中的精准操控策略。</div>
+          <div class="card-tags">
+            <span class="tag">multi-agent</span>
+            <span class="tag">dexterous hand</span>
+            <span class="tag">IsaacGym</span>
+          </div>
+        </div>
+        <div class="research-card">
+          <div class="card-icon">🐾</div>
+          <div class="card-title">Locomotion Teacher</div>
+          <div class="card-desc">四足 B2Z1（45维观测/11D动作）与双足 G1（47维观测/12D动作）的运动控制策略学习，基于 curriculum learning 逐步提升运动质量。</div>
+          <div class="card-tags">
+            <span class="tag">locomotion</span>
+            <span class="tag">B2Z1</span>
+            <span class="tag">curriculum</span>
+          </div>
+        </div>
+        <div class="research-card">
+          <div class="card-icon">🦾</div>
+          <div class="card-title">UR5e 精准抛球</div>
+          <div class="card-desc">UR5e 机械臂结合 B2Z1+Z1+RH56DFX 灵巧手的抛球任务，设计多阶段奖励函数，突破 8m 目标距离训练瓶颈。</div>
+          <div class="card-tags">
+            <span class="tag">UR5e</span>
+            <span class="tag">RH56DFX</span>
+            <span class="tag">reward shaping</span>
+          </div>
+        </div>
+        <div class="research-card">
+          <div class="card-icon">📐</div>
+          <div class="card-title">奖励函数工程</div>
+          <div class="card-desc">深入研究 aim shaping、velocity direction reward、release bonus 等奖励组件的设计，通过 TensorBoard 监控训练曲线，迭代优化策略表现。</div>
+          <div class="card-tags">
+            <span class="tag">reward design</span>
+            <span class="tag">TensorBoard</span>
+            <span class="tag">PPO</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills" style="padding-top:0;">
+    <div class="container fade-up">
+      <div class="section-label">// skills</div>
+      <div class="section-title">技能栈</div>
+      <div class="skills-wrapper">
+        <div class="skill-group">
+          <div class="skill-group-title">Deep Learning</div>
+          <div class="skill-item">
+            <span class="skill-name">PyTorch</span>
+            <div class="skill-bar"><div class="skill-fill" style="width:90%"></div></div>
+          </div>
+          <div class="skill-item">
+            <span class="skill-name">Python</span>
+            <div class="skill-bar"><div class="skill-fill" style="width:92%"></div></div>
+          </div>
+          <div class="skill-item">
+            <span class="skill-name">NumPy / Matplotlib</span>
+            <div class="skill-bar"><div class="skill-fill" style="width:85%"></div></div>
+          </div>
+        </div>
+        <div class="skill-group">
+          <div class="skill-group-title">Robotics & RL</div>
+          <div class="skill-item">
+            <span class="skill-name">IsaacGym</span>
+            <div class="skill-bar"><div class="skill-fill" style="width:88%"></div></div>
+          </div>
+          <div class="skill-item">
+            <span class="skill-name">rsl_rl / PPO</span>
+            <div class="skill-bar"><div class="skill-fill" style="width:82%"></div></div>
+          </div>
+          <div class="skill-item">
+            <span class="skill-name">Reward Design</span>
+            <div class="skill-bar"><div class="skill-fill" style="width:80%"></div></div>
+          </div>
+        </div>
+        <div class="skill-group">
+          <div class="skill-group-title">Systems</div>
+          <div class="skill-item">
+            <span class="skill-name">Ubuntu / Linux</span>
+            <div class="skill-bar"><div class="skill-fill" style="width:85%"></div></div>
+          </div>
+          <div class="skill-item">
+            <span class="skill-name">Conda / Git</span>
+            <div class="skill-bar"><div class="skill-fill" style="width:88%"></div></div>
+          </div>
+          <div class="skill-item">
+            <span class="skill-name">TensorBoard</span>
+            <div class="skill-bar"><div class="skill-fill" style="width:78%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS / PORTFOLIO -->
+  <section id="projects">
+    <div class="container fade-up">
+      <div class="section-label">// portfolio</div>
+      <div class="section-title">项目与资源</div>
+      <div class="project-grid">
+        <!-- ML Journal 博客卡片 - 醒目 -->
+        <a href="./my-MachineLearning-journal/index.html" class="project-card" style="border-color: rgba(52,211,153,0.3); grid-column: 1 / -1;">
+          <div class="badge blog">新上线 · 博客</div>
+          <h3>📔 Machine Learning 学习日志</h3>
+          <p>记录机器学习与强化学习的学习历程、踩坑笔记、论文阅读心得，以及具身智能研究过程中的技术探索。持续更新中。</p>
+          <span class="arrow">→</span>
+        </a>
+        <div class="project-card" style="cursor: default;">
+          <div class="badge rl">强化学习</div>
+          <h3>B2Z1 Throw Precise</h3>
+          <p>灵巧手精准抛球任务，修复 target_reward、投掷插值时间、robot_base_pos 更新等多个训练瓶颈，突破 5m curriculum 关卡。</p>
+        </div>
+        <div class="project-card" style="cursor: default;">
+          <div class="badge robot">机械臂</div>
+          <h3>UR5e Handball Throw</h3>
+          <p>UR5e 机械臂抛球任务优化：aim_shaping 增加 25° 发射角 clamp，MinDist 从 8.0 调整至 4.0，扩展 curriculum 范围至 4m-8m。</p>
+        </div>
+        <div class="project-card" style="cursor: default;">
+          <div class="badge sim">仿真</div>
+          <h3>Locomotion Teacher</h3>
+          <p>B2Z1 四足与 G1 双足运动控制策略，完成动作空间降维（12D → 11D），统一诊断开关 self._diag，支持 yaml 配置。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <div class="container fade-up">
+      <div class="section-label">// experience</div>
+      <div class="section-title">教育 & 经历</div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-period">2024 — 至今</div>
+          <div class="tl-title">研究生 · 具身智能方向</div>
+          <div class="tl-org">上海交通大学</div>
+          <div class="tl-desc">在严老师课题组从事机器人强化学习研究，专注于多智能体协作基准、足式运动控制与灵巧手操控任务，使用 IsaacGym 进行策略仿真训练。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background: var(--accent2);"></div>
+          <div class="tl-period">2024</div>
+          <div class="tl-title">Dynamic Dexterity Arena 项目启动</div>
+          <div class="tl-org">具身智能实验室</div>
+          <div class="tl-desc">搭建多智能体协作 RL 基准，设计 handball throwing、b2z1_throw_precise、humanoid_throw_precise 等任务变体，系统性研究奖励函数工程。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background: var(--accent3);"></div>
+          <div class="tl-period">持续进行</div>
+          <div class="tl-title">RL 训练系统优化</div>
+          <div class="tl-org">自主研究</div>
+          <div class="tl-desc">搭建 Ubuntu 24.04 + RTX 3050 训练环境，解决 IsaacGym/Conda 依赖问题，实现 TensorBoard 可视化监控与 curriculum 动态调整。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="container fade-up">
+      <div class="contact-box">
+        <h2>保持联系</h2>
+        <p>对具身智能、机器人 RL 或 ML 有想法？欢迎交流！</p>
+        <div class="contact-links">
+          <a href="mailto:13937562298@sjtu.edu.cn" class="contact-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
+            13937562298@sjtu.edu.cn
+          </a>
+          <a href="https://github.com/dreamseekeres" target="_blank" class="contact-link">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+            dreamseekeres
+          </a>
+          <a href="./my-MachineLearning-journal/index.html" class="contact-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+            ML 学习日志
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <p>© 2026 王艺博 · Built with passion for robotics · <a href="./my-MachineLearning-journal/index.html">ML Journal →</a></p>
+    </div>
+  </footer>
+
+  <script>
+    // Nav scroll effect
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 40);
+    });
+
+    // Fade-up animation
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
