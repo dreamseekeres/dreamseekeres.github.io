@@ -406,156 +406,75 @@ print(&quot;hello&quot;)
     </div>
   </div>
 
-  <script>
+  <script id="default-posts-data" type="application/json">
+[
+  {
+    "id": 1,
+    "title": "IsaacGym 环境搭建：从零开始的踩坑记录",
+    "category": "practice",
+    "date": "2026-06-15",
+    "summary": "记录在 Ubuntu 24.04 + RTX 3050 上搭建 IsaacGym 环境的全过程，包括 Conda 依赖冲突解决、LD_LIBRARY_PATH 设置以及 GPU 渲染问题排查。",
+    "tags": [
+      "IsaacGym",
+      "Ubuntu",
+      "环境配置",
+      "CUDA"
+    ],
+    "content": "## 环境信息\n\n- OS: Ubuntu 24.04 LTS\n- GPU: RTX 3050 + Intel Iris Xe (双显卡)\n- Conda 环境: `dg` (Python 3.8)\n- 关键依赖: `numpy`, `torch`, `rsl_rl`, `unitree_rl_gym`\n\n## 踩坑 1：LD_LIBRARY_PATH 问题\n\nIsaacGym 运行时需要手动设置 Conda 的库路径，否则会报找不到 `libpython3.8.so` 的错误：\n\n```bash\nexport LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH\n```\n\n建议写到 `~/.bashrc` 里，但注意切换环境后需要重新 source。\n\n## 踩坑 2：双 GPU 渲染冲突\n\nRTX 3050 + Intel Iris Xe 在 IsaacGym GUI 模式下会发生渲染冲突。解决方案是强制使用 Intel 核显：\n\n```bash\n__NV_PRIME_RENDER_OFFLOAD=0 __GLX_VENDOR_LIBRARY_NAME=intel python train.py\n```\n\n## 结论\n\nheadless 模式（加 `--headless` 参数）训练时不存在 GPU 渲染冲突，推荐在正式训练时使用 headless。"
+  },
+  {
+    "id": 2,
+    "title": "PPO 算法深度解析：从理论到 rsl_rl 实现",
+    "category": "theory",
+    "date": "2026-06-10",
+    "summary": "深入理解 Proximal Policy Optimization（PPO）算法的核心机制，结合 rsl_rl 库的具体实现，分析 clip ratio、GAE 优势估计和 entropy bonus 的作用。",
+    "tags": [
+      "PPO",
+      "强化学习",
+      "rsl_rl",
+      "策略梯度"
+    ],
+    "content": "## PPO 的核心思想\n\nPPO 是目前机器人强化学习中最常用的算法之一，核心思想是通过**截断（clipping）**来约束策略更新步长，避免更新过大导致训练不稳定。\n\n### Clip Objective\n\n```python\nratio = pi(a|s) / pi_old(a|s)\nL_clip = min(ratio * A, clip(ratio, 1-eps, 1+eps) * A)\n```\n\n其中 `eps` 通常设为 **0.2**。\n\n### GAE 优势估计\n\nGeneralized Advantage Estimation (GAE) 通过引入 `lambda` 参数平衡偏差和方差：\n\n| lambda | 效果 |\n|--------|------|\n| 0 | 一步 TD，低方差高偏差 |\n| 1 | Monte Carlo，高方差低偏差 |\n| 0.95 | rsl_rl 默认值（推荐） |\n\n## 在 IsaacGym 中的体会\n\n并行环境数量（`num_envs`）是影响样本效率的关键参数。**4096 个并行环境**下，一次 rollout 就能收集大量样本，显著加速训练。\n\n`rsl_rl` 的实现还加入了 **value loss clip** 和 **entropy bonus**，这些对训练稳定性至关重要。"
+  },
+  {
+    "id": 3,
+    "title": "Curriculum Learning 在抛球任务中的设计与调优",
+    "category": "rl",
+    "date": "2026-06-05",
+    "summary": "记录 B2Z1 精准抛球任务中 curriculum learning 的设计思路：从近距离逐步扩展至 8m 目标，以及 MinDist 参数调整对训练稳定性的影响。",
+    "tags": [
+      "Curriculum Learning",
+      "B2Z1",
+      "IsaacGym",
+      "奖励函数"
+    ],
+    "content": "## 问题背景\n\n在 `b2z1_throw_precise.py` 中，训练到 **5m 距离就陷入瓶颈**，无法继续晋级。经分析，主要问题有：\n\n1. **target_reward 设计问题**：原来对所有目标帧都发奖励，导致多目标干扰\n2. **投掷插值时间过短**：影响抛球质量\n3. **robot_base_pos 未更新**：导致 curriculum 距离计算偏差\n\n### 修复方案\n\n#### 1. target_reward 只奖励最近目标帧\n\n```python\n# Before: 对所有目标帧发奖励\n# After: 只对最近目标帧发奖励\nnearest_target_idx = torch.argmin(dist_to_targets, dim=-1)\ntarget_reward = reach_goal_bonus[nearest_target_idx]\n```\n\n#### 2. MinDist 参数调整\n\n从 UR5e 的经验迁移：将 MinDist 从 8.0 改为 **4.0**，训练范围扩展至 **4m–8m**，避免 curriculum 过拟合近距离。\n\n### KF_JOINT6_TARGET 对齐\n\n将 `KF_JOINT6_TARGET` 设为 3.3（与 `handball_throw_fixed.py` 对齐），释放关节活动范围，改善抛球姿态。"
+  },
+  {
+    "id": 4,
+    "title": "论文阅读：《Learning to Walk in Minutes》",
+    "category": "paper",
+    "date": "2026-05-28",
+    "summary": "阅读 NVIDIA 的 legged robot locomotion 经典论文，理解 massively parallel simulation 在足式机器人训练中的作用。",
+    "tags": [
+      "论文",
+      "Locomotion",
+      "并行仿真",
+      "足式机器人"
+    ],
+    "content": "## 论文概述\n\n| 字段 | 值 |\n|------|-----|\n| 标题 | Learning to Walk in Minutes Using Massively Parallel Deep RL |\n| 作者 | Rudin et al. (NVIDIA, ETH Zurich) |\n\n核心贡献：通过大规模并行仿真（**4096 environments**），在几分钟内训练出能在真实四足机器人上迁移的运动策略。\n\n## 技术要点\n\n### 1. Observation Space 设计\n\n- Base angular velocity × 0.25\n- Projected gravity\n- Commands (vx, vy, omega)\n- Joint position error × 1.0\n- Joint velocity × 0.05\n- Previous actions\n\n与 B2Z1 (45维) 和 G1 (47维) 观测空间设计高度吻合。\n\n### 2. Curriculum 自适应地形难度\n\n通过自适应 curriculum 动态调整地形难度，让策略逐渐学会复杂地形行走。\n\n## 与 B2Z1 的对比\n\n| 项目 | 论文 | B2Z1 |\n|------|------|------|\n| 观测维度 | 45 | 45 |\n| 动作维度 | 12 | 11 (移除 j5) |\n| vx max | 1.0 m/s | 2.0 m/s |\n\n## 感悟\n\n大规模并行仿真确实是当前足式机器人 RL 的主流范式，IsaacGym 的作用不可替代。"
+  }
+]
+    </script>
+    <script>
     // ══════════════════════════════════
     // Default posts data
     // ══════════════════════════════════
-    const DEFAULT_POSTS = [
-      {
-        id:1,title:'IsaacGym 环境搭建：从零开始的踩坑记录',category:'practice',
-        date:'2026-06-15',
-        summary:'记录在 Ubuntu 24.04 + RTX 3050 上搭建 IsaacGym 环境的全过程，包括 Conda 依赖冲突解决、LD_LIBRARY_PATH 设置以及 GPU 渲染问题排查。',
-        tags:['IsaacGym','Ubuntu','环境配置','CUDA'],
-        content:`## 环境信息
-
-- OS: Ubuntu 24.04 LTS
-- GPU: RTX 3050 + Intel Iris Xe (双显卡)
-- Conda 环境: \`dg\` (Python 3.8)
-- 关键依赖: \`numpy\`, \`torch\`, \`rsl_rl\`, \`unitree_rl_gym\`
-
-## 踩坑 1：LD_LIBRARY_PATH 问题
-
-IsaacGym 运行时需要手动设置 Conda 的库路径，否则会报找不到 \`libpython3.8.so\` 的错误：
-
-\`\`\`bash
-export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
-\`\`\`
-
-建议写到 \`~/.bashrc\` 里，但注意切换环境后需要重新 source。
-
-## 踩坑 2：双 GPU 渲染冲突
-
-RTX 3050 + Intel Iris Xe 在 IsaacGym GUI 模式下会发生渲染冲突。解决方案是强制使用 Intel 核显：
-
-\`\`\`bash
-__NV_PRIME_RENDER_OFFLOAD=0 __GLX_VENDOR_LIBRARY_NAME=intel python train.py
-\`\`\`
-
-## 结论
-
-headless 模式（加 \`--headless\` 参数）训练时不存在 GPU 渲染冲突，推荐在正式训练时使用 headless。`
-      },
-      {
-        id:2,title:'PPO 算法深度解析：从理论到 rsl_rl 实现',category:'theory',
-        date:'2026-06-10',
-        summary:'深入理解 Proximal Policy Optimization（PPO）算法的核心机制，结合 rsl_rl 库的具体实现，分析 clip ratio、GAE 优势估计和 entropy bonus 的作用。',
-        tags:['PPO','强化学习','rsl_rl','策略梯度'],
-        content:`## PPO 的核心思想
-
-PPO 是目前机器人强化学习中最常用的算法之一，核心思想是通过**截断（clipping）**来约束策略更新步长，避免更新过大导致训练不稳定。
-
-### Clip Objective
-
-\`\`\`python
-ratio = pi(a|s) / pi_old(a|s)
-L_clip = min(ratio * A, clip(ratio, 1-eps, 1+eps) * A)
-\`\`\`
-
-其中 \`eps\` 通常设为 **0.2**。
-
-### GAE 优势估计
-
-Generalized Advantage Estimation (GAE) 通过引入 \`lambda\` 参数平衡偏差和方差：
-
-| lambda | 效果 |
-|--------|------|
-| 0 | 一步 TD，低方差高偏差 |
-| 1 | Monte Carlo，高方差低偏差 |
-| 0.95 | rsl_rl 默认值（推荐） |
-
-## 在 IsaacGym 中的体会
-
-并行环境数量（\`num_envs\`）是影响样本效率的关键参数。**4096 个并行环境**下，一次 rollout 就能收集大量样本，显著加速训练。
-
-\`rsl_rl\` 的实现还加入了 **value loss clip** 和 **entropy bonus**，这些对训练稳定性至关重要。`
-      },
-      {
-        id:3,title:'Curriculum Learning 在抛球任务中的设计与调优',category:'rl',
-        date:'2026-06-05',
-        summary:'记录 B2Z1 精准抛球任务中 curriculum learning 的设计思路：从近距离逐步扩展至 8m 目标，以及 MinDist 参数调整对训练稳定性的影响。',
-        tags:['Curriculum Learning','B2Z1','IsaacGym','奖励函数'],
-        content:`## 问题背景
-
-在 \`b2z1_throw_precise.py\` 中，训练到 **5m 距离就陷入瓶颈**，无法继续晋级。经分析，主要问题有：
-
-1. **target_reward 设计问题**：原来对所有目标帧都发奖励，导致多目标干扰
-2. **投掷插值时间过短**：影响抛球质量
-3. **robot_base_pos 未更新**：导致 curriculum 距离计算偏差
-
-### 修复方案
-
-#### 1. target_reward 只奖励最近目标帧
-
-\`\`\`python
-# Before: 对所有目标帧发奖励
-# After: 只对最近目标帧发奖励
-nearest_target_idx = torch.argmin(dist_to_targets, dim=-1)
-target_reward = reach_goal_bonus[nearest_target_idx]
-\`\`\`
-
-#### 2. MinDist 参数调整
-
-从 UR5e 的经验迁移：将 MinDist 从 8.0 改为 **4.0**，训练范围扩展至 **4m–8m**，避免 curriculum 过拟合近距离。
-
-### KF_JOINT6_TARGET 对齐
-
-将 \`KF_JOINT6_TARGET\` 设为 3.3（与 \`handball_throw_fixed.py\` 对齐），释放关节活动范围，改善抛球姿态。`
-      },
-      {
-        id:4,title:'论文阅读：《Learning to Walk in Minutes》',category:'paper',
-        date:'2026-05-28',
-        summary:'阅读 NVIDIA 的 legged robot locomotion 经典论文，理解 massively parallel simulation 在足式机器人训练中的作用。',
-        tags:['论文','Locomotion','并行仿真','足式机器人'],
-        content:`## 论文概述
-
-| 字段 | 值 |
-|------|-----|
-| 标题 | Learning to Walk in Minutes Using Massively Parallel Deep RL |
-| 作者 | Rudin et al. (NVIDIA, ETH Zurich) |
-
-核心贡献：通过大规模并行仿真（**4096 environments**），在几分钟内训练出能在真实四足机器人上迁移的运动策略。
-
-## 技术要点
-
-### 1. Observation Space 设计
-
-- Base angular velocity × 0.25
-- Projected gravity
-- Commands (vx, vy, omega)
-- Joint position error × 1.0
-- Joint velocity × 0.05
-- Previous actions
-
-与 B2Z1 (45维) 和 G1 (47维) 观测空间设计高度吻合。
-
-### 2. Curriculum 自适应地形难度
-
-通过自适应 curriculum 动态调整地形难度，让策略逐渐学会复杂地形行走。
-
-## 与 B2Z1 的对比
-
-| 项目 | 论文 | B2Z1 |
-|------|------|------|
-| 观测维度 | 45 | 45 |
-| 动作维度 | 12 | 11 (移除 j5) |
-| vx max | 1.0 m/s | 2.0 m/s |
-
-## 感悟
-
-大规模并行仿真确实是当前足式机器人 RL 的主流范式，IsaacGym 的作用不可替代。`
-      }
-    ];
-
+    const DEFAULT_POSTS = (function(){
+      try {
+        return JSON.parse(document.getElementById('default-posts-data').textContent || '[]');
+      } catch (e) { console.error('Failed to parse default posts', e); return []; }
+    })();
     // ══════════════════════════════════
     // State
     // ══════════════════════════════════
@@ -620,7 +539,7 @@ target_reward = reach_goal_bonus[nearest_target_idx]
     function filterPosts(cat, el) {
       currentFilter = cat;
       document.querySelectorAll('.filter-btn,.sidebar-link').forEach(b=>b.classList.remove('active'));
-      if(el){ el.classList.add('active'); const s=document.querySelector(\`.sidebar-link[onclick*="${cat}"]\`); if(s)s.classList.add('active'); }
+      if(el){ el.classList.add('active'); const s=document.querySelector(".sidebar-link[onclick*='" + cat + "']"); if(s)s.classList.add('active'); }
       renderPosts();
       return false;
     }
