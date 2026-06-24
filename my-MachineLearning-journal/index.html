@@ -287,7 +287,7 @@
         <div><div class="nav-brand-text">ML 学习日志</div><div class="nav-brand-sub">my-MachineLearning-journal</div></div>
       </a>
       <div class="nav-right">
-        <a href="#" onclick="openEditor()">写日志</a>
+        <a href="javascript:void(0)" onclick="openEditor();return false">写日志</a>
         <a href="#" onclick="filterPosts('all', this)">全部</a>
         <a href="../index.html" class="home-link">← 返回主页</a>
       </div>
@@ -318,7 +318,7 @@
     <!-- MAIN -->
     <main>
       <div class="blog-header">
-        <div class="blog-header-top"><div class="blog-title">学习日志</div><a href="#" onclick="openEditor()" class="new-post-btn">+ 写新日志</a></div>
+        <div class="blog-header-top"><div class="blog-title">学习日志</div><a href="javascript:void(0)" onclick="openEditor();return false" class="new-post-btn">+ 写新日志</a></div>
         <p class="blog-desc">记录机器学习与强化学习的学习历程、具身智能研究中的技术探索与踩坑笔记。</p>
         <div class="stats-row">
           <div class="stat"><div class="stat-n" id="total-posts">0</div><div class="stat-l">篇日志</div></div>
@@ -683,7 +683,8 @@ target_reward = reach_goal_bonus[nearest_target_idx]
     // ══════════════════════════════════
     // Editor
     // ══════════════════════════════════
-    function openEditor(postId) {
+    function openEditor(postId, e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
       editPostId = postId || null;
       savedImages = [];
       const overlay = document.getElementById('editor-overlay');
@@ -962,8 +963,7 @@ target_reward = reach_goal_bonus[nearest_target_idx]
     // Keyboard shortcut: Cmd/Ctrl+N to open editor
     document.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'n' && !document.getElementById('editor-overlay').classList.contains('open')) {
-        e.preventDefault();
-        openEditor();
+        e.preventDefault(); openEditor(null, e);
       }
     });
   </script>
