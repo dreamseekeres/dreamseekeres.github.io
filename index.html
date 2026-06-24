@@ -27,6 +27,30 @@
       --font-mono: 'JetBrains Mono', monospace;
     }
 
+    html.light-mode {
+      --bg: #f7f9fc;
+      --bg2: #ffffff;
+      --bg3: #eef1f5;
+      --border: rgba(0,0,0,0.08);
+      --border-hover: rgba(0,0,0,0.16);
+      --text: #1a1d26;
+      --text2: #4b5163;
+      --text3: #8b92a5;
+      --accent: #2563eb;
+      --accent2: #7c3aed;
+      --accent3: #059669;
+      --accent4: #d97706;
+      --red: #ef4444;
+    }
+    html.light-mode body::before { opacity: 0.01; }
+    html.light-mode .glow-blob { opacity: 0.05; }
+    html.light-mode nav.scrolled { background: rgba(247,249,252,0.92); border-bottom-color: var(--border); }
+    html.light-mode .btn-primary { color: #fff; }
+    html.light-mode .btn-outline { color: var(--text); }
+    html.light-mode .hero-tag { background: rgba(37,99,235,0.08); border-color: rgba(37,99,235,0.25); }
+    html.light-mode .contact-link svg { fill: var(--text2); }
+    html.light-mode .contact-link:hover svg { fill: var(--accent); }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html { scroll-behavior: smooth; }
@@ -80,12 +104,19 @@
       color: var(--text); text-decoration: none; letter-spacing: -0.5px;
     }
     .nav-logo span { color: var(--accent); }
-    .nav-links { display: flex; gap: 28px; }
+    .nav-links { display: flex; gap: 28px; align-items: center; }
     .nav-links a {
       color: var(--text2); text-decoration: none; font-size: 14px;
       transition: color 0.2s;
     }
     .nav-links a:hover { color: var(--text); }
+    .theme-toggle {
+      background: transparent; border: 1px solid var(--border); color: var(--text2);
+      border-radius: 7px; padding: 6px 10px; font-size: 13px; cursor: pointer;
+      transition: all 0.18s; line-height: 1; display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font-sans);
+    }
+    .theme-toggle:hover { color: var(--text); border-color: var(--border-hover); }
 
     /* ---- Hero ---- */
     #hero {
@@ -309,6 +340,7 @@
         <a href="#projects">Projects</a>
         <a href="#experience">Experience</a>
         <a href="#contact">Contact</a>
+        <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="切换深色/浅色主题">🌙</button>
       </div>
     </div>
   </nav>
@@ -600,6 +632,19 @@
   </footer>
 
   <script>
+    // Theme toggle (global, shared with blog)
+    let currentTheme = 'dark';
+    try { currentTheme = localStorage.getItem('site_theme') || 'dark'; } catch {}
+    if (currentTheme === 'light') document.documentElement.classList.add('light-mode');
+    function toggleTheme() {
+      currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.classList.toggle('light-mode', currentTheme === 'light');
+      const btn = document.getElementById('theme-toggle');
+      btn.textContent = currentTheme === 'light' ? '☀️' : '🌙';
+      try { localStorage.setItem('site_theme', currentTheme); } catch {}
+    }
+    document.getElementById('theme-toggle').textContent = currentTheme === 'light' ? '☀️' : '🌙';
+
     // Nav scroll effect
     const nav = document.getElementById('main-nav');
     window.addEventListener('scroll', () => {

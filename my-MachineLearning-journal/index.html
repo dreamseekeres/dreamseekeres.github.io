@@ -17,6 +17,31 @@
       --font-sans: 'Inter', 'Noto Sans SC', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
     }
+
+    html.light-mode {
+      --bg: #f7f9fc; --bg2: #ffffff; --bg3: #eef1f5;
+      --border: rgba(0,0,0,0.08); --border-hover: rgba(0,0,0,0.16);
+      --text: #1a1d26; --text2: #4b5163; --text3: #8b92a5;
+      --accent: #059669; --accent2: #2563eb; --accent3: #7c3aed; --accent4: #d97706;
+    }
+    html.light-mode body { background: var(--bg); }
+    html.light-mode .glow-blob { opacity: 0.05; }
+    html.light-mode nav { background: rgba(247,249,252,0.92); }
+    html.light-mode .nav-brand-icon { background: rgba(5,150,105,0.12); border-color: rgba(5,150,105,0.3); }
+    html.light-mode .new-post-btn { color: #fff; }
+    html.light-mode .sidebar-link:hover, html.light-mode .sidebar-link.active { background: var(--bg3); }
+    html.light-mode .tag-chip { background: var(--bg3); }
+    html.light-mode .post-card { background: var(--bg2); }
+    html.light-mode .modal { background: var(--bg2); }
+    html.light-mode .attachment-box { background: var(--bg3); }
+
+    /* Editor overlay uses its own dark palette by default, independent of page theme */
+    .editor-overlay {
+      --bg: #0d0f14; --bg2: #13161e; --bg3: #1a1e28;
+      --border: rgba(255,255,255,0.07); --border-hover: rgba(255,255,255,0.15);
+      --text: #e8eaf0; --text2: #9098ad; --text3: #5a6278;
+      --accent: #34d399; --accent2: #4f8ef7; --accent3: #7b5cf0; --accent4: #f59e0b;
+    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body { font-family: var(--font-sans); background: var(--bg); color: var(--text); line-height: 1.7; overflow-x: hidden; }
@@ -41,6 +66,13 @@
     .nav-right a:hover { color: var(--text); }
     .nav-right .home-link { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text3); border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; text-decoration: none; transition: all 0.2s; }
     .nav-right .home-link:hover { border-color: var(--accent2); color: var(--accent2); }
+    .nav-theme-toggle {
+      background: transparent; border: 1px solid var(--border); color: var(--text2);
+      border-radius: 6px; padding: 5px 10px; font-size: 13px; cursor: pointer;
+      transition: all 0.18s; line-height: 1; display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font-sans);
+    }
+    .nav-theme-toggle:hover { color: var(--text); border-color: var(--border-hover); }
 
     /* Layout */
     .page-wrap { max-width: 1100px; margin: 0 auto; padding: 90px 28px 60px; position: relative; z-index: 1; display: grid; grid-template-columns: 240px 1fr; gap: 40px; }
@@ -399,6 +431,7 @@
       <div class="nav-right">
         <button type="button" class="nav-btn" onclick="openEditor()">写日志</button>
         <button type="button" class="nav-btn" onclick="filterPosts('all', this)">全部</button>
+        <button type="button" class="nav-theme-toggle" id="nav-theme-toggle" onclick="toggleSiteTheme()" title="切换深色/浅色主题">🌙</button>
         <a href="../index.html" class="home-link">← 返回主页</a>
       </div>
     </div>
@@ -597,6 +630,22 @@ print(&quot;hello&quot;)
         return JSON.parse(document.getElementById('default-posts-data').textContent || '[]');
       } catch (e) { console.error('Failed to parse default posts', e); return []; }
     })();
+    // ══════════════════════════════════
+    // Global site theme (shared with main site)
+    // ══════════════════════════════════
+    let siteTheme = 'dark';
+    try { siteTheme = localStorage.getItem('site_theme') || 'dark'; } catch {}
+    if (siteTheme === 'light') document.documentElement.classList.add('light-mode');
+    function toggleSiteTheme() {
+      siteTheme = siteTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.classList.toggle('light-mode', siteTheme === 'light');
+      const btn = document.getElementById('nav-theme-toggle');
+      if (btn) btn.textContent = siteTheme === 'light' ? '☀️' : '🌙';
+      try { localStorage.setItem('site_theme', siteTheme); } catch {}
+    }
+    const navThemeBtn = document.getElementById('nav-theme-toggle');
+    if (navThemeBtn) navThemeBtn.textContent = siteTheme === 'light' ? '☀️' : '🌙';
+
     // ══════════════════════════════════
     // State
     // ══════════════════════════════════
