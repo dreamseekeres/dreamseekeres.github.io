@@ -170,6 +170,46 @@
       transition: all 0.18s; line-height: 1;
     }
     .et-fs-toggle:hover { color: var(--text); border-color: var(--border-hover); }
+    .et-theme-toggle, .et-attach-btn {
+      background: transparent; border: 1px solid var(--border); color: var(--text3);
+      padding: 6px 10px; border-radius: 7px; cursor: pointer; font-size: 13px;
+      transition: all 0.18s; line-height: 1; display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font-sans);
+    }
+    .et-theme-toggle:hover, .et-attach-btn:hover { color: var(--text); border-color: var(--border-hover); }
+    .et-attach-btn input { display: none; }
+    .et-attach-hint { font-size: 11px; color: var(--text3); margin-left: 4px; }
+
+    /* Editor overlay light mode overrides */
+    .editor-overlay.light-mode {
+      --bg: #ffffff; --bg2: #f7f9fc; --bg3: #eef1f5;
+      --border: rgba(0,0,0,0.10); --border-hover: rgba(0,0,0,0.20);
+      --text: #1a1d26; --text2: #4b5163; --text3: #8b92a5;
+    }
+    .editor-overlay.light-mode .editor-toolbar { background: rgba(255,255,255,0.95); }
+    .editor-overlay.light-mode .ed-textarea { color: var(--text); background: #ffffff; }
+    .editor-overlay.light-mode .ed-textarea::placeholder { color: #aab0bf; }
+    .editor-overlay.light-mode .pv h1,
+    .editor-overlay.light-mode .pv h2,
+    .editor-overlay.light-mode .pv h3,
+    .editor-overlay.light-mode .pv strong { color: var(--text); }
+    .editor-overlay.light-mode .pv p { color: var(--text2); }
+    .editor-overlay.light-mode .pv code { background: rgba(79,142,247,0.12); border-color: rgba(79,142,247,0.25); color: #1d4ed8; }
+    .editor-overlay.light-mode .pv pre { background: #f4f6f9; border-color: var(--border); }
+    .editor-overlay.light-mode .pv blockquote { border-left-color: #d1d5db; background: rgba(0,0,0,0.03); color: var(--text2); }
+    .editor-overlay.light-mode .pv table { border-color: var(--border); }
+    .editor-overlay.light-mode .pv th { background: var(--bg2); color: var(--text); }
+    .editor-overlay.light-mode .pv td { border-color: var(--border); color: var(--text2); }
+    .editor-overlay.light-mode .ed-preview-area { background: var(--bg); }
+    .editor-overlay.light-mode .et-title-input { color: var(--text); }
+    .editor-overlay.light-mode .et-title-input::placeholder { color: #aab0bf; }
+    .editor-overlay.light-mode .et-tag-input { background: var(--bg3); color: var(--text); border-color: var(--border); }
+    .editor-overlay.light-mode .et-select { background: var(--bg3); color: var(--text); border-color: var(--border); }
+    .editor-overlay.light-mode .et-status { background: rgba(52,211,153,0.12); color: #0a7a55; }
+    .editor-overlay.light-mode .ed-label { background: var(--bg2); color: var(--text3); border-color: var(--border); }
+    .editor-overlay.light-mode .attachment-list { background: var(--bg2); border-color: var(--border); }
+    .editor-overlay.light-mode .attachment-item { border-color: var(--border); }
+    .editor-overlay.light-mode .attachment-item:hover { background: var(--bg3); }
 
     .editor-body { flex: 1; display: flex; overflow: hidden; position: relative; }
     .ed-pane {
@@ -186,16 +226,23 @@
     .editor-body.mode-preview .ed-pane:last-child { flex: 0 0 100%; }
 
     .ed-divider {
-      width: 6px; flex-shrink: 0; cursor: col-resize;
-      background: transparent; position: relative; z-index: 10;
-      transition: background 0.18s;
+      width: 10px; flex-shrink: 0; cursor: col-resize;
+      background: var(--bg3); position: relative; z-index: 10;
+      transition: background 0.18s, border-color 0.18s;
+      border-left: 1px solid var(--border); border-right: 1px solid var(--border);
     }
-    .ed-divider:hover, .ed-divider.dragging { background: var(--accent); }
+    .ed-divider:hover, .ed-divider.dragging { background: var(--accent); border-color: rgba(52,211,153,0.4); }
+    .ed-divider::before {
+      content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 4px; height: 32px; border-radius: 3px; background: var(--border-hover); opacity: 0.7;
+    }
     .ed-divider::after {
       content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      width: 2px; height: 24px; border-radius: 2px; background: var(--border-hover);
+      width: 2px; height: 24px; border-radius: 2px; background: var(--text3); opacity: 0.5;
     }
-    .ed-divider:hover::after, .ed-divider.dragging::after { background: rgba(52,211,153,0.6); }
+    .ed-divider:hover::before, .ed-divider.dragging::before { background: rgba(52,211,153,0.35); }
+    .ed-divider:hover::after, .ed-divider.dragging::after { background: #0d0f14; opacity: 1; }
+    .editor-body.light-mode .ed-divider:hover::after { background: #ffffff; }
     .editor-body.mode-edit .ed-divider,
     .editor-body.mode-preview .ed-divider { display: none; }
     body.dragging { cursor: col-resize; user-select: none; }
@@ -275,6 +322,38 @@
       border-radius: 6px; padding: 4px 10px; font-size: 12px; color: var(--accent4);
       font-family: var(--font-mono); vertical-align: middle; margin: 4px 0;
     }
+
+    /* Attachments */
+    .attachment-list {
+      margin: 10px 16px 0; padding: 8px 10px; border-radius: 8px;
+      background: var(--bg2); border: 1px solid var(--border); font-size: 12px;
+      max-height: 92px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .attachment-item {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--bg3); color: var(--text2); transition: all 0.18s;
+    }
+    .attachment-item:hover { background: var(--bg2); color: var(--text); }
+    .attachment-item .a-name { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .attachment-item .a-size { color: var(--text3); font-size: 10px; font-family: var(--font-mono); }
+    .attachment-item .a-del { cursor: pointer; color: var(--text3); font-size: 14px; line-height: 1; padding: 0 2px; }
+    .attachment-item .a-del:hover { color: #f87171; }
+    .attachment-item .a-insert { cursor: pointer; color: var(--accent); font-size: 11px; margin-left: 4px; }
+    .attachment-item .a-insert:hover { text-decoration: underline; }
+    .pv .attachment-box {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px 16px; margin: 18px 0;
+    }
+    .pv .attachment-box-title { font-size: 12px; color: var(--text3); margin-bottom: 8px; font-family: var(--font-mono); }
+    .pv .attachment-link {
+      display: flex; align-items: center; gap: 10px; padding: 7px 10px;
+      border-radius: 6px; border: 1px solid var(--border); margin-bottom: 6px;
+      background: var(--bg3); color: var(--text); text-decoration: none; transition: all 0.18s;
+    }
+    .pv .attachment-link:hover { border-color: var(--accent); color: var(--accent); }
+    .pv .attachment-link svg { width: 20px; height: 20px; flex-shrink: 0; opacity: 0.85; }
+    .pv .attachment-link .a-meta { margin-left: auto; font-size: 11px; color: var(--text3); font-family: var(--font-mono); }
 
     /* ── Read modal ── */
     .modal-overlay{
@@ -383,6 +462,11 @@
             <option value="practice">实战记录</option><option value="paper">论文阅读</option>
           </select>
           <input class="et-tag-input" id="ed-tags" placeholder="标签，逗号分隔" />
+          <label class="et-attach-btn" title="上传附件（支持 PDF、图片等）">
+            📎 附件
+            <input type="file" id="ed-attach-input" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.md,.txt" multiple onchange="handleFileAttachment(event)" />
+          </label>
+          <span class="et-attach-hint" id="attach-hint"></span>
           <span class="et-status" id="ed-status">已保存</span>
         </div>
       </div>
@@ -392,17 +476,19 @@
           <button type="button" class="et-view-btn" id="view-edit" onclick="setViewMode('edit')">编辑</button>
           <button type="button" class="et-view-btn" id="view-preview" onclick="setViewMode('preview')">预览</button>
         </div>
+        <button class="et-theme-toggle" id="theme-toggle" onclick="toggleEditorTheme()" title="切换编辑器背景主题">🌙 深色</button>
         <button class="et-fs-toggle" onclick="toggleFullscreen()" title="全屏切换" id="fs-btn">⛶ 全屏</button>
         <button class="et-btn et-cancel" onclick="closeEditor(false)">取消</button>
         <button class="et-btn et-save" onclick="savePostFromEditor()">保存发布</button>
       </div>
     </div>
+    <div class="attachment-list" id="attachment-list" style="display:none;"></div>
 
     <!-- Editor Body -->
     <div class="editor-body mode-split" id="editor-body" style="--editor-split:50%;">
       <!-- Left: Editor -->
       <div class="ed-pane" id="ed-pane-edit">
-        <div class="ed-label">✎ 编辑区 &nbsp;<span style="color:var(--text3);font-weight:400;">— 支持 Ctrl+V 粘贴图片，Tab 缩进</span></div>
+        <div class="ed-label">✎ 编辑区 &nbsp;<span style="color:var(--text3);font-weight:400;">— 支持 Ctrl+V 粘贴图片 / 上方 📎 上传附件</span></div>
         <div class="ed-editor-area">
           <textarea class="ed-textarea" id="ed-source"
             placeholder="# 今天学了什么？
@@ -419,7 +505,7 @@
 print(&quot;hello&quot;)
 \`\`\`
 
-**提示：直接在编辑器中 Ctrl+V 粘贴图片即可！**"></textarea>
+**提示：直接在编辑器中 Ctrl+V 粘贴图片；点击上方 📎 附件上传 PDF/图片。**"></textarea>
         </div>
       </div>
       <!-- Draggable divider -->
@@ -521,11 +607,19 @@ print(&quot;hello&quot;)
     let previewEditInProgress = false;
     let isFullscreen = false;
     let savedImages = [];   // base64 images stored for this session's post
+    let editorAttachments = []; // attachments for current editing session
+    let editorTheme = 'dark'; // 'dark' | 'light'
     let previewDebounce;
 
     function loadPosts() {
       const saved = localStorage.getItem('ml_journal_posts');
-      if (saved) { try { posts = JSON.parse(saved); } catch { posts = [...DEFAULT_POSTS]; } }
+      if (saved) {
+        try {
+          posts = JSON.parse(saved);
+          // Migration: ensure all posts have attachments array
+          posts.forEach(p => { if (!Array.isArray(p.attachments)) p.attachments = []; });
+        } catch { posts = [...DEFAULT_POSTS]; }
+      }
       else { posts = [...DEFAULT_POSTS]; }
     }
     function savePosts() { localStorage.setItem('ml_journal_posts', JSON.stringify(posts)); }
@@ -646,8 +740,12 @@ print(&quot;hello&quot;)
       if (e) { e.preventDefault(); e.stopPropagation(); }
       editPostId = postId || null;
       savedImages = [];
+      editorAttachments = [];
       currentViewMode = 'split';
       previewEditInProgress = false;
+      // Load persisted editor theme preference
+      try { editorTheme = localStorage.getItem('ml_editor_theme') || 'dark'; } catch { editorTheme = 'dark'; }
+      applyEditorTheme();
       const overlay = document.getElementById('editor-overlay');
       const body = document.getElementById('editor-body');
       body.classList.remove('mode-edit','mode-preview');
@@ -662,12 +760,14 @@ print(&quot;hello&quot;)
         document.getElementById('ed-category').value = post.category || 'rl';
         document.getElementById('ed-tags').value = (post.tags || []).join(', ');
         document.getElementById('ed-source').value = post.content || '';
+        editorAttachments = (post.attachments || []).map(a => ({...a}));
       } else {
         document.getElementById('ed-title').value = '';
         document.getElementById('ed-category').value = 'rl';
         document.getElementById('ed-tags').value = '';
         document.getElementById('ed-source').value = '';
       }
+      renderAttachmentList();
 
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -694,6 +794,8 @@ print(&quot;hello&quot;)
       exitFullscreenMode();
       currentViewMode = 'split';
       previewEditInProgress = false;
+      editorAttachments = [];
+      renderAttachmentList();
       renderAll();
     }
 
@@ -789,6 +891,125 @@ print(&quot;hello&quot;)
     }
 
     // ══════════════════════════════════
+    // Theme toggle
+    // ══════════════════════════════════
+    function toggleEditorTheme() {
+      editorTheme = editorTheme === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('ml_editor_theme', editorTheme); } catch {}
+      applyEditorTheme();
+    }
+
+    function applyEditorTheme() {
+      const overlay = document.getElementById('editor-overlay');
+      const body = document.getElementById('editor-body');
+      const btn = document.getElementById('theme-toggle');
+      if (editorTheme === 'light') {
+        overlay.classList.add('light-mode');
+        body.classList.add('light-mode');
+        btn.textContent = '☀️ 浅色';
+      } else {
+        overlay.classList.remove('light-mode');
+        body.classList.remove('light-mode');
+        btn.textContent = '🌙 深色';
+      }
+    }
+
+    // ══════════════════════════════════
+    // Attachments
+    // ══════════════════════════════════
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function handleFileAttachment(e) {
+      const files = e.target.files;
+      if (!files || files.length === 0) return;
+      Array.from(files).forEach(file => {
+        // Skip extremely large files (warn > 3MB per file, hard reject > 15MB)
+        if (file.size > 15 * 1024 * 1024) {
+          alert('文件太大：' + file.name + '（超过 15MB），建议压缩或上传到网盘后贴链接。');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          editorAttachments.push({
+            name: file.name,
+            type: file.type || 'application/octet-stream',
+            size: file.size,
+            data: ev.target.result
+          });
+          renderAttachmentList();
+          updateStatus('已添加附件：' + file.name);
+        };
+        reader.onerror = () => { updateStatus('读取附件失败'); };
+        reader.readAsDataURL(file);
+      });
+      e.target.value = ''; // allow re-selecting same file
+    }
+
+    function renderAttachmentList() {
+      const list = document.getElementById('attachment-list');
+      const hint = document.getElementById('attach-hint');
+      if (editorAttachments.length === 0) {
+        list.style.display = 'none';
+        list.innerHTML = '';
+        hint.textContent = '';
+        return;
+      }
+      list.style.display = 'flex';
+      const total = editorAttachments.reduce((sum, a) => sum + (a.size || 0), 0);
+      hint.textContent = '共 ' + editorAttachments.length + ' 个 / ' + formatFileSize(total);
+      list.innerHTML = editorAttachments.map((a, i) => `
+        <div class="attachment-item">
+          <span class="a-name" title="${escHtml(a.name)}">${escHtml(a.name)}</span>
+          <span class="a-size">${formatFileSize(a.size || 0)}</span>
+          <span class="a-insert" onclick="insertAttachmentLink(${i})" title="插入链接到 Markdown">插入</span>
+          <span class="a-del" onclick="removeAttachment(${i})" title="删除附件">×</span>
+        </div>
+      `).join('');
+    }
+
+    function removeAttachment(idx) {
+      if (!confirm('确定删除附件：' + editorAttachments[idx].name + '？')) return;
+      editorAttachments.splice(idx, 1);
+      renderAttachmentList();
+      updateStatus('已删除附件');
+    }
+
+    function insertAttachmentLink(idx) {
+      const a = editorAttachments[idx];
+      if (!a) return;
+      const ta = document.getElementById('ed-source');
+      const pos = ta.selectionStart;
+      const md = `[📎 ${a.name}](${a.data})`;
+      ta.value = ta.value.substring(0, pos) + '\n' + md + '\n' + ta.value.substring(pos);
+      ta.selectionStart = ta.selectionEnd = pos + md.length + 2;
+      ta.focus();
+      updatePreview();
+      updateStatus('已插入附件链接');
+    }
+
+    function renderAttachmentsBox(attachments) {
+      if (!attachments || attachments.length === 0) return '';
+      const pdfIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>`;
+      const fileIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>`;
+      return `
+        <div class="attachment-box">
+          <div class="attachment-box-title">附件</div>
+          ${attachments.map(a => `
+            <a class="attachment-link" href="${a.data}" target="_blank" download="${escHtml(a.name)}">
+              ${a.type === 'application/pdf' || a.name.toLowerCase().endsWith('.pdf') ? pdfIcon : fileIcon}
+              <span>${escHtml(a.name)}</span>
+              <span class="a-meta">${formatFileSize(a.size || 0)}</span>
+            </a>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // ══════════════════════════════════
     // Paste image handler
     // ══════════════════════════════════
     async function handlePaste(e) {
@@ -829,7 +1050,7 @@ print(&quot;hello&quot;)
       }
     }
 
-    // Also support drag-and-drop of images into editor area
+    // Also support drag-and-drop of images / files into editor area
     function setupDragDrop() {
       const edArea = document.querySelector('.ed-editor-area');
       edArea.ondragover = (e) => { e.preventDefault(); e.dataTransfer.dropEffect='copy'; };
@@ -854,6 +1075,18 @@ print(&quot;hello&quot;)
               updateStatus(`已添加图片 (${savedImages.length})`);
             };
             reader.readAsDataURL(file);
+          } else {
+            // Treat non-image files as attachments
+            if (file.size > 15 * 1024 * 1024) {
+              alert('文件太大：' + file.name + '（超过 15MB）'); return;
+            }
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              editorAttachments.push({ name: file.name, type: file.type || 'application/octet-stream', size: file.size, data: ev.target.result });
+              renderAttachmentList();
+              updateStatus('已拖入附件：' + file.name);
+            };
+            reader.readAsDataURL(file);
           }
         });
       };
@@ -867,7 +1100,7 @@ print(&quot;hello&quot;)
       const pv = document.getElementById('ed-preview');
       if (previewEditInProgress) return;
       if (!src.trim()) {
-        pv.innerHTML = '<p class="ed-preview-placeholder">开始输入 Markdown 内容，这里会即时显示渲染结果...<br><span style="font-size:12px;">支持代码块 / 表格 / 图片 / 引用 / 列表等语法</span></p>';
+        pv.innerHTML = '<p class="ed-preview-placeholder">开始输入 Markdown 内容，这里会即时显示渲染结果...<br><span style="font-size:12px;">支持代码块 / 表格 / 图片 / 引用 / 列表 / 附件等语法</span></p>';
         return;
       }
       pv.innerHTML = renderMarkdown(src);
@@ -887,7 +1120,7 @@ print(&quot;hello&quot;)
 
       const tags = rawTags ? rawTags.split(',').map(t=>t.trim()).filter(Boolean) : ['笔记'];
       const today = new Date().toISOString().slice(0,10);
-      const summary = content.replace(/```[\s\S]*?```/g,'').replace(/!\[[^\]]*]\([^)]+\)/g,'[图片]').replace(/[#*`>\-\[\]]/g,'').trim().slice(0,140)+'...';
+      const summary = content.replace(/```[\s\S]*?```/g,'').replace(/!\[[^\]]*]\([^)]+\)/g,'[图片]').replace(/\[([^\]]+)\]\(data:[^)]+\)/g,'').replace(/[#*`>\-\[\]]/g,'').trim().slice(0,140)+'...';
 
       if (editPostId !== null) {
         // Update existing
@@ -898,9 +1131,10 @@ print(&quot;hello&quot;)
           posts[idx].tags = tags;
           posts[idx].content = content;
           posts[idx].summary = summary;
+          posts[idx].attachments = editorAttachments.map(a => ({...a}));
         }
       } else {
-        posts.unshift({ id: Date.now(), title, category: cat, date: today, summary, tags, content });
+        posts.unshift({ id: Date.now(), title, category: cat, date: today, summary, tags, content, attachments: editorAttachments.map(a => ({...a})) });
       }
 
       savePosts();
@@ -966,7 +1200,7 @@ print(&quot;hello&quot;)
           `<span class="post-tag ${p.category}">${categoryLabel(p.category)}</span>` +
           `${p.tags.map(t=>`<span class="post-chip">${escHtml(t)}</span>`).join('')}` +
         `</div>` +
-        `<div class="modal-content pv">${renderMarkdown(p.content)}</div>`;
+        `<div class="modal-content pv">${renderMarkdown(p.content)}${renderAttachmentsBox(p.attachments)}</div>`;
       document.getElementById('modal-overlay').classList.add('open');
       document.body.style.overflow = 'hidden';
     }
