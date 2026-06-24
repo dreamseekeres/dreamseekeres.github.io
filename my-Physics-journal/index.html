@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ML 学习日志 | Yibo Wang</title>
-  <meta name="description" content="王艺博的机器学习日志 — 强化学习、具身智能、论文笔记" />
+  <title>物理学习日志 | Yibo Wang</title>
+  <meta name="description" content="王艺博的物理学习日志 — 力学、电磁学、热学、量子物理" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -520,7 +520,7 @@
     <div class="nav-inner">
       <a class="nav-brand" href="./index.html">
         <div class="nav-brand-icon">📔</div>
-        <div><div class="nav-brand-text">ML 学习日志</div><div class="nav-brand-sub">my-MachineLearning-journal</div></div>
+        <div><div class="nav-brand-text">物理学习日志</div><div class="nav-brand-sub">my-MachineLearning-journal</div></div>
       </a>
       <div class="nav-right">
         <button type="button" class="nav-btn" onclick="openEditor()">写日志</button>
@@ -546,14 +546,14 @@
       </div>
       <div class="sidebar-section">
         <div class="sidebar-title">关于此博客</div>
-        <p style="font-size:13px;color:var(--text3);line-height:1.7;">记录机器学习与具身智能的学习历程、踩坑笔记和论文心得。支持 Markdown 实时预览。</p>
+        <p style="font-size:13px;color:var(--text3);line-height:1.7;">记录经典力学、电磁学、热力学与量子物理的学习历程、推导笔记与实验心得。支持 Markdown 实时预览。</p>
       </div>
     </aside>
 
     <!-- MAIN -->
     <main>
       <div class="blog-header">
-        <div class="blog-header-top"><div class="blog-title">学习日志</div><button type="button" class="new-post-btn" onclick="openEditor()">+ 写新日志</button></div>
+        <div class="blog-header-top"><div class="blog-title">物理学习日志</div><button type="button" class="new-post-btn" onclick="openEditor()">+ 写新日志</button></div>
         <p class="blog-desc">记录机器学习与强化学习的学习历程、具身智能研究中的技术探索与踩坑笔记。</p>
         <div class="stats-row">
           <div class="stat"><div class="stat-n" id="total-posts">0</div><div class="stat-l">篇日志</div></div>
@@ -663,60 +663,140 @@ print(&quot;hello&quot;)
   <script id="default-posts-data" type="application/json">
 [
   {
-    "id": 1,
-    "title": "IsaacGym 环境搭建：从零开始的踩坑记录",
-    "category": "practice",
-    "date": "2026-06-15",
-    "summary": "记录在 Ubuntu 24.04 + RTX 3050 上搭建 IsaacGym 环境的全过程，包括 Conda 依赖冲突解决、LD_LIBRARY_PATH 设置以及 GPU 渲染问题排查。",
+    "id": 1740019200000,
+    "title": "牛顿力学基础：从 F=ma 到动量守恒",
+    "category": "mechanics",
+    "date": "2025-02-20",
+    "summary": "梳理牛顿三定律、动量定理与能量守恒的推导关系，整理常见受力分析误区。",
     "tags": [
-      "IsaacGym",
-      "Ubuntu",
-      "环境配置",
-      "CUDA"
+      "力学",
+      "牛顿定律",
+      "动量守恒",
+      "能量守恒"
     ],
-    "content": "## 环境信息\n\n- OS: Ubuntu 24.04 LTS\n- GPU: RTX 3050 + Intel Iris Xe (双显卡)\n- Conda 环境: `dg` (Python 3.8)\n- 关键依赖: `numpy`, `torch`, `rsl_rl`, `unitree_rl_gym`\n\n## 踩坑 1：LD_LIBRARY_PATH 问题\n\nIsaacGym 运行时需要手动设置 Conda 的库路径，否则会报找不到 `libpython3.8.so` 的错误：\n\n```bash\nexport LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH\n```\n\n建议写到 `~/.bashrc` 里，但注意切换环境后需要重新 source。\n\n## 踩坑 2：双 GPU 渲染冲突\n\nRTX 3050 + Intel Iris Xe 在 IsaacGym GUI 模式下会发生渲染冲突。解决方案是强制使用 Intel 核显：\n\n```bash\n__NV_PRIME_RENDER_OFFLOAD=0 __GLX_VENDOR_LIBRARY_NAME=intel python train.py\n```\n\n## 结论\n\nheadless 模式（加 `--headless` 参数）训练时不存在 GPU 渲染冲突，推荐在正式训练时使用 headless。"
+    "content": "# 牛顿力学基础
+
+## 牛顿三定律
+
+1. **第一定律**：惯性定律。
+2. **第二定律**：F = ma。
+3. **第三定律**：作用力与反作用力。
+
+## 动量守恒
+
+当系统所受合外力为零时，总动量守恒：
+
+```
+p_total = m1 v1 + m2 v2 = const
+```
+
+## 学习心得
+
+受力分析时建议先画隔离体图，再建坐标系。",
+    "attachments": []
   },
   {
-    "id": 2,
-    "title": "PPO 算法深度解析：从理论到 rsl_rl 实现",
-    "category": "theory",
-    "date": "2026-06-10",
-    "summary": "深入理解 Proximal Policy Optimization（PPO）算法的核心机制，结合 rsl_rl 库的具体实现，分析 clip ratio、GAE 优势估计和 entropy bonus 的作用。",
+    "id": 1740105600000,
+    "title": "麦克斯韦方程组：从积分到微分形式",
+    "category": "electromagnetism",
+    "date": "2025-02-21",
+    "summary": "总结麦克斯韦方程组的四个方程，理解高斯定律、法拉第电磁感应与位移电流。",
     "tags": [
-      "PPO",
-      "强化学习",
-      "rsl_rl",
-      "策略梯度"
+      "电磁学",
+      "麦克斯韦方程组",
+      "高斯定律",
+      "法拉第定律"
     ],
-    "content": "## PPO 的核心思想\n\nPPO 是目前机器人强化学习中最常用的算法之一，核心思想是通过**截断（clipping）**来约束策略更新步长，避免更新过大导致训练不稳定。\n\n### Clip Objective\n\n```python\nratio = pi(a|s) / pi_old(a|s)\nL_clip = min(ratio * A, clip(ratio, 1-eps, 1+eps) * A)\n```\n\n其中 `eps` 通常设为 **0.2**。\n\n### GAE 优势估计\n\nGeneralized Advantage Estimation (GAE) 通过引入 `lambda` 参数平衡偏差和方差：\n\n| lambda | 效果 |\n|--------|------|\n| 0 | 一步 TD，低方差高偏差 |\n| 1 | Monte Carlo，高方差低偏差 |\n| 0.95 | rsl_rl 默认值（推荐） |\n\n## 在 IsaacGym 中的体会\n\n并行环境数量（`num_envs`）是影响样本效率的关键参数。**4096 个并行环境**下，一次 rollout 就能收集大量样本，显著加速训练。\n\n`rsl_rl` 的实现还加入了 **value loss clip** 和 **entropy bonus**，这些对训练稳定性至关重要。"
+    "content": "# 麦克斯韦方程组
+
+## 积分形式
+
+- 高斯电场：E 面积分等于 Q/epsilon0
+- 高斯磁场：B 面积分等于 0
+- 法拉第：电场环路积分等于 -dΦB/dt
+- 安培-麦克斯韦：磁场环路积分等于 μ0 I + μ0ε0 dΦE/dt
+
+## 微分形式
+
+使用散度与旋度表示更紧凑。
+
+## 学习心得
+
+建议先理解每个方程的物理图像，再背数学形式。",
+    "attachments": []
   },
   {
-    "id": 3,
-    "title": "Curriculum Learning 在抛球任务中的设计与调优",
-    "category": "rl",
-    "date": "2026-06-05",
-    "summary": "记录 B2Z1 精准抛球任务中 curriculum learning 的设计思路：从近距离逐步扩展至 8m 目标，以及 MinDist 参数调整对训练稳定性的影响。",
+    "id": 1740192000000,
+    "title": "热力学第一定律：内能、功与热量",
+    "category": "thermodynamics",
+    "date": "2025-02-22",
+    "summary": "从微观与宏观两个角度理解内能、功、热量，整理等温/绝热/等压/等容过程公式。",
     "tags": [
-      "Curriculum Learning",
-      "B2Z1",
-      "IsaacGym",
-      "奖励函数"
+      "热力学",
+      "内能",
+      "焓",
+      "熵"
     ],
-    "content": "## 问题背景\n\n在 `b2z1_throw_precise.py` 中，训练到 **5m 距离就陷入瓶颈**，无法继续晋级。经分析，主要问题有：\n\n1. **target_reward 设计问题**：原来对所有目标帧都发奖励，导致多目标干扰\n2. **投掷插值时间过短**：影响抛球质量\n3. **robot_base_pos 未更新**：导致 curriculum 距离计算偏差\n\n### 修复方案\n\n#### 1. target_reward 只奖励最近目标帧\n\n```python\n# Before: 对所有目标帧发奖励\n# After: 只对最近目标帧发奖励\nnearest_target_idx = torch.argmin(dist_to_targets, dim=-1)\ntarget_reward = reach_goal_bonus[nearest_target_idx]\n```\n\n#### 2. MinDist 参数调整\n\n从 UR5e 的经验迁移：将 MinDist 从 8.0 改为 **4.0**，训练范围扩展至 **4m–8m**，避免 curriculum 过拟合近距离。\n\n### KF_JOINT6_TARGET 对齐\n\n将 `KF_JOINT6_TARGET` 设为 3.3（与 `handball_throw_fixed.py` 对齐），释放关节活动范围，改善抛球姿态。"
+    "content": "# 热力学第一定律
+
+## 核心公式
+
+```
+delta U = Q - W
+```
+
+其中 U 为内能，Q 为系统吸收热量，W 为系统对外做功。
+
+## 常见过程
+
+| 过程 | 特征 | 热量/功 |
+|------|------|--------|
+| 等容 | V 不变 | W=0 |
+| 等压 | p 不变 | W=pΔV |
+| 等温 | T 不变 | ΔU=0 |
+| 绝热 | Q=0 | 泊松关系 |
+
+## 学习心得
+
+注意符号约定，有些教材用 ΔU = Q + W。",
+    "attachments": []
   },
   {
-    "id": 4,
-    "title": "论文阅读：《Learning to Walk in Minutes》",
-    "category": "paper",
-    "date": "2026-05-28",
-    "summary": "阅读 NVIDIA 的 legged robot locomotion 经典论文，理解 massively parallel simulation 在足式机器人训练中的作用。",
+    "id": 1740278400000,
+    "title": "量子力学入门：波函数与薛定谔方程",
+    "category": "quantum",
+    "date": "2025-02-23",
+    "summary": "阅读 Griffiths 第一章，整理波函数的概率诠释、归一化条件与定态薛定谔方程。",
     "tags": [
-      "论文",
-      "Locomotion",
-      "并行仿真",
-      "足式机器人"
+      "量子力学",
+      "薛定谔方程",
+      "波函数",
+      "Griffiths"
     ],
-    "content": "## 论文概述\n\n| 字段 | 值 |\n|------|-----|\n| 标题 | Learning to Walk in Minutes Using Massively Parallel Deep RL |\n| 作者 | Rudin et al. (NVIDIA, ETH Zurich) |\n\n核心贡献：通过大规模并行仿真（**4096 environments**），在几分钟内训练出能在真实四足机器人上迁移的运动策略。\n\n## 技术要点\n\n### 1. Observation Space 设计\n\n- Base angular velocity × 0.25\n- Projected gravity\n- Commands (vx, vy, omega)\n- Joint position error × 1.0\n- Joint velocity × 0.05\n- Previous actions\n\n与 B2Z1 (45维) 和 G1 (47维) 观测空间设计高度吻合。\n\n### 2. Curriculum 自适应地形难度\n\n通过自适应 curriculum 动态调整地形难度，让策略逐渐学会复杂地形行走。\n\n## 与 B2Z1 的对比\n\n| 项目 | 论文 | B2Z1 |\n|------|------|------|\n| 观测维度 | 45 | 45 |\n| 动作维度 | 12 | 11 (移除 j5) |\n| vx max | 1.0 m/s | 2.0 m/s |\n\n## 感悟\n\n大规模并行仿真确实是当前足式机器人 RL 的主流范式，IsaacGym 的作用不可替代。"
+    "content": "# 量子力学入门
+
+## 波函数概率诠释
+
+```
+P(a<x<b) = integral_a^b |psi(x)|^2 dx
+```
+
+## 归一化
+
+```
+integral |psi(x)|^2 dx = 1
+```
+
+## 定态薛定谔方程
+
+```
+-hbar^2/(2m) d2psi/dx2 + V psi = E psi
+```
+
+## 学习心得
+
+先掌握无限深势阱的解法，再过渡到谐振子。",
+    "attachments": []
   }
 ]
     </script>
@@ -762,7 +842,7 @@ print(&quot;hello&quot;)
     let previewDebounce;
 
     function loadPosts() {
-      const saved = localStorage.getItem('ml_journal_posts');
+      const saved = localStorage.getItem('physics_journal_posts');
       if (saved) {
         try {
           posts = JSON.parse(saved);
@@ -772,7 +852,7 @@ print(&quot;hello&quot;)
       }
       else { posts = [...DEFAULT_POSTS]; }
     }
-    function savePosts() { localStorage.setItem('ml_journal_posts', JSON.stringify(posts)); }
+    function savePosts() { localStorage.setItem('physics_journal_posts', JSON.stringify(posts)); }
 
     function escHtml(s) {
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1481,8 +1561,8 @@ print(&quot;hello&quot;)
     // ══════════════════════════════════
     // Dynamic Category System
     // ══════════════════════════════════
-    const DEFAULT_CATEGORIES = [{"id": "rl", "label": "强化学习", "color": "#4f8ef7"}, {"id": "theory", "label": "理论笔记", "color": "#7b5cf0"}, {"id": "practice", "label": "实战记录", "color": "#34d399"}, {"id": "paper", "label": "论文阅读", "color": "#f59e0b"}];
-    const CATEGORIES_KEY = 'ml_journal_categories';
+    const DEFAULT_CATEGORIES = [{"id": "mechanics", "label": "力学", "color": "#4f8ef7"}, {"id": "electromagnetism", "label": "电磁学", "color": "#f59e0b"}, {"id": "thermodynamics", "label": "热力学", "color": "#f87171"}, {"id": "quantum", "label": "量子物理", "color": "#7b5cf0"}];
+    const CATEGORIES_KEY = 'physics_journal_categories';
 
     function getCategories() {
       try {
