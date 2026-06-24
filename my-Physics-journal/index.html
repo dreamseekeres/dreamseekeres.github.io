@@ -520,7 +520,7 @@
     <div class="nav-inner">
       <a class="nav-brand" href="./index.html">
         <div class="nav-brand-icon">📔</div>
-        <div><div class="nav-brand-text">物理学习日志</div><div class="nav-brand-sub">my-MachineLearning-journal</div></div>
+        <div><div class="nav-brand-text">物理学习日志</div><div class="nav-brand-sub">my-Physics-journal</div></div>
       </a>
       <div class="nav-right">
         <button type="button" class="nav-btn" onclick="openEditor()">写日志</button>
@@ -554,7 +554,7 @@
     <main>
       <div class="blog-header">
         <div class="blog-header-top"><div class="blog-title">物理学习日志</div><button type="button" class="new-post-btn" onclick="openEditor()">+ 写新日志</button></div>
-        <p class="blog-desc">记录机器学习与强化学习的学习历程、具身智能研究中的技术探索与踩坑笔记。</p>
+        <p class="blog-desc">记录经典力学、电磁学、热力学与量子物理的学习历程、推导笔记与实验心得。</p>
         <div class="stats-row">
           <div class="stat"><div class="stat-n" id="total-posts">0</div><div class="stat-l">篇日志</div></div>
           <div class="stat"><div class="stat-n" id="total-tags">0</div><div class="stat-l">个话题</div></div>
@@ -674,25 +674,7 @@ print(&quot;hello&quot;)
       "动量守恒",
       "能量守恒"
     ],
-    "content": "# 牛顿力学基础
-
-## 牛顿三定律
-
-1. **第一定律**：惯性定律。
-2. **第二定律**：F = ma。
-3. **第三定律**：作用力与反作用力。
-
-## 动量守恒
-
-当系统所受合外力为零时，总动量守恒：
-
-```
-p_total = m1 v1 + m2 v2 = const
-```
-
-## 学习心得
-
-受力分析时建议先画隔离体图，再建坐标系。",
+    "content": "# 牛顿力学基础\n\n## 牛顿三定律\n\n1. **第一定律**：惯性定律。\n2. **第二定律**：F = ma。\n3. **第三定律**：作用力与反作用力。\n\n## 动量守恒\n\n当系统所受合外力为零时，总动量守恒：\n\n\n\n## 学习心得\n\n受力分析时建议先画隔离体图，再建坐标系。",
     "attachments": []
   },
   {
@@ -707,22 +689,7 @@ p_total = m1 v1 + m2 v2 = const
       "高斯定律",
       "法拉第定律"
     ],
-    "content": "# 麦克斯韦方程组
-
-## 积分形式
-
-- 高斯电场：E 面积分等于 Q/epsilon0
-- 高斯磁场：B 面积分等于 0
-- 法拉第：电场环路积分等于 -dΦB/dt
-- 安培-麦克斯韦：磁场环路积分等于 μ0 I + μ0ε0 dΦE/dt
-
-## 微分形式
-
-使用散度与旋度表示更紧凑。
-
-## 学习心得
-
-建议先理解每个方程的物理图像，再背数学形式。",
+    "content": "# 麦克斯韦方程组\n\n## 积分形式\n\n- 高斯电场：E 面积分等于 Q/epsilon0\n- 高斯磁场：B 面积分等于 0\n- 法拉第：电场环路积分等于 -dΦB/dt\n- 安培-麦克斯韦：磁场环路积分等于 μ0 I + μ0ε0 dΦE/dt\n\n## 微分形式\n\n使用散度与旋度表示更紧凑。\n\n## 学习心得\n\n建议先理解每个方程的物理图像，再背数学形式。",
     "attachments": []
   },
   {
@@ -737,28 +704,7 @@ p_total = m1 v1 + m2 v2 = const
       "焓",
       "熵"
     ],
-    "content": "# 热力学第一定律
-
-## 核心公式
-
-```
-delta U = Q - W
-```
-
-其中 U 为内能，Q 为系统吸收热量，W 为系统对外做功。
-
-## 常见过程
-
-| 过程 | 特征 | 热量/功 |
-|------|------|--------|
-| 等容 | V 不变 | W=0 |
-| 等压 | p 不变 | W=pΔV |
-| 等温 | T 不变 | ΔU=0 |
-| 绝热 | Q=0 | 泊松关系 |
-
-## 学习心得
-
-注意符号约定，有些教材用 ΔU = Q + W。",
+    "content": "# 热力学第一定律\n\n## 核心公式\n\n\n\n其中 U 为内能，Q 为系统吸收热量，W 为系统对外做功。\n\n## 常见过程\n\n| 过程 | 特征 | 热量/功 |\n|------|------|--------|\n| 等容 | V 不变 | W=0 |\n| 等压 | p 不变 | W=pΔV |\n| 等温 | T 不变 | ΔU=0 |\n| 绝热 | Q=0 | 泊松关系 |\n\n## 学习心得\n\n注意符号约定，有些教材用 ΔU = Q + W。",
     "attachments": []
   },
   {
@@ -773,29 +719,7 @@ delta U = Q - W
       "波函数",
       "Griffiths"
     ],
-    "content": "# 量子力学入门
-
-## 波函数概率诠释
-
-```
-P(a<x<b) = integral_a^b |psi(x)|^2 dx
-```
-
-## 归一化
-
-```
-integral |psi(x)|^2 dx = 1
-```
-
-## 定态薛定谔方程
-
-```
--hbar^2/(2m) d2psi/dx2 + V psi = E psi
-```
-
-## 学习心得
-
-先掌握无限深势阱的解法，再过渡到谐振子。",
+    "content": "# 量子力学入门\n\n## 波函数概率诠释\n\n\n\n## 归一化\n\n\n\n## 定态薛定谔方程\n\n\n\n## 学习心得\n\n先掌握无限深势阱的解法，再过渡到谐振子。",
     "attachments": []
   }
 ]
