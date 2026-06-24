@@ -411,10 +411,79 @@
     .modal-content li{margin-bottom:6px;}
     .modal-content img{max-width:100%;border-radius:8px;border:1px solid var(--border);margin:14px 0;}
 
+    /* Modal action buttons (edit / fullscreen) */
+    .modal-actions {
+      position: absolute; top: 20px; right: 90px;
+      display: flex; gap: 8px;
+    }
+    .modal-action-btn {
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 6px;
+      padding: 6px 12px; color: var(--text2); cursor: pointer; font-size: 14px;
+      transition: all 0.18s; display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font-sans);
+    }
+    .modal-action-btn:hover { color: var(--text); border-color: var(--border-hover); }
+    .modal-action-btn.accent { color: var(--accent); border-color: rgba(52,211,153,0.3); }
+    .modal-action-btn.accent:hover { background: rgba(52,211,153,0.08); }
+
+    /* Fullscreen modal */
+    .modal-overlay.fullscreen {
+      padding: 0; background: var(--bg);
+      backdrop-filter: none;
+    }
+    .modal-overlay.fullscreen .modal {
+      max-width: 100%; width: 100%; max-height: 100vh; height: 100vh;
+      border-radius: 0; border: none; padding: 50px 60px;
+    }
+    .modal-overlay.fullscreen .modal-close { top: 16px; right: 16px; }
+    .modal-overlay.fullscreen .modal-actions { top: 16px; right: 86px; }
+
+    /* Attachment viewer overlay */
+    .viewer-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: var(--bg); display: none; flex-direction: column;
+    }
+    .viewer-overlay.open { display: flex; }
+    .viewer-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px; border-bottom: 1px solid var(--border);
+      background: var(--bg2); flex-shrink: 0;
+    }
+    .viewer-title { font-size: 14px; font-weight: 500; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .viewer-btns { display: flex; gap: 8px; }
+    .viewer-btn {
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 6px;
+      padding: 6px 12px; color: var(--text2); cursor: pointer; font-size: 13px;
+      transition: all 0.18s; font-family: var(--font-sans);
+    }
+    .viewer-btn:hover { color: var(--text); border-color: var(--border-hover); }
+    .viewer-body {
+      flex: 1; overflow: hidden; display: flex; align-items: center; justify-content: center;
+      padding: 20px; background: var(--bg);
+    }
+    .viewer-body iframe, .viewer-body img, .viewer-body pre {
+      max-width: 100%; max-height: 100%; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg2);
+    }
+    .viewer-body iframe { width: 100%; height: 100%; }
+    .viewer-body pre {
+      width: 100%; height: 100%; overflow: auto; padding: 20px; font-size: 13px;
+      font-family: var(--font-mono); color: var(--text); white-space: pre-wrap; word-break: break-word;
+    }
+
+    /* Attachment view button */
+    .pv .attachment-link .a-view {
+      margin-left: auto; margin-right: 8px; font-size: 11px; color: var(--accent2);
+      cursor: pointer; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border);
+      background: transparent; transition: all 0.18s; font-family: var(--font-sans);
+    }
+    .pv .attachment-link .a-view:hover { background: rgba(79,142,247,0.08); border-color: var(--accent2); }
+
     @media(max-width:768px){
       .page-wrap{grid-template-columns:1fr;} .sidebar{position:static;}
       .editor-body{flex-direction:column;}
       .ed-pane{min-height:40vh; border-right:none !important; border-bottom:1px solid var(--border);}
+      .modal-overlay.fullscreen .modal { padding: 60px 20px; }
     }
   </style>
 </head>
@@ -556,9 +625,25 @@ print(&quot;hello&quot;)
   <!-- Read modal -->
   <div class="modal-overlay" id="modal-overlay" onclick="closeReadModal(event)">
     <div class="modal" id="modal-content">
+      <div class="modal-actions" id="modal-actions">
+        <button class="modal-action-btn accent" onclick="editCurrentPost()">✎ 编辑</button>
+        <button class="modal-action-btn" onclick="toggleModalFullscreen()">⛶ 全屏</button>
+      </div>
       <button class="modal-close" onclick="closeReadModal()">关闭 ✕</button>
       <div id="modal-inner"></div>
     </div>
+  </div>
+
+  <!-- Attachment viewer -->
+  <div class="viewer-overlay" id="viewer-overlay">
+    <div class="viewer-toolbar">
+      <div class="viewer-title" id="viewer-title">📄 附件预览</div>
+      <div class="viewer-btns">
+        <a class="viewer-btn" id="viewer-download" href="#" target="_blank" download>下载</a>
+        <button class="viewer-btn" onclick="closeViewer()">关闭</button>
+      </div>
+    </div>
+    <div class="viewer-body" id="viewer-body"></div>
   </div>
 
   <script id="default-posts-data" type="application/json">
@@ -655,6 +740,8 @@ print(&quot;hello&quot;)
     let currentViewMode = 'split';
     let previewEditInProgress = false;
     let isFullscreen = false;
+    let modalFullscreen = false;
+    let readingPostId = null; // currently open post in read modal
     let savedImages = [];   // base64 images stored for this session's post
     let editorAttachments = []; // attachments for current editing session
     let editorTheme = 'dark'; // 'dark' | 'light'
@@ -1040,22 +1127,36 @@ print(&quot;hello&quot;)
       updateStatus('已插入附件链接');
     }
 
-    function renderAttachmentsBox(attachments) {
+    function renderAttachmentsBox(attachments, context) {
       if (!attachments || attachments.length === 0) return '';
       const pdfIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>`;
       const fileIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>`;
       return `
         <div class="attachment-box">
           <div class="attachment-box-title">附件</div>
-          ${attachments.map(a => `
-            <a class="attachment-link" href="${a.data}" target="_blank" download="${escHtml(a.name)}">
+          ${attachments.map((a, i) => {
+            const isViewable = isAttachmentViewable(a);
+            return `
+            <div class="attachment-link">
               ${a.type === 'application/pdf' || a.name.toLowerCase().endsWith('.pdf') ? pdfIcon : fileIcon}
               <span>${escHtml(a.name)}</span>
               <span class="a-meta">${formatFileSize(a.size || 0)}</span>
-            </a>
-          `).join('')}
+              ${isViewable ? `<button class="a-view" onclick="viewAttachmentByIndex(${i})">查看</button>` : ''}
+              <a class="a-view" style="margin-left:0;text-decoration:none;display:inline-flex;align-items:center;" href="${a.data}" target="_blank" download="${escHtml(a.name)}">下载</a>
+            </div>
+          `}).join('')}
         </div>
       `;
+    }
+
+    function isAttachmentViewable(a) {
+      if (!a || !a.data) return false;
+      const t = (a.type || '').toLowerCase();
+      const name = (a.name || '').toLowerCase();
+      if (t.startsWith('image/')) return true;
+      if (t === 'application/pdf' || name.endsWith('.pdf')) return true;
+      if (t.startsWith('text/') || name.endsWith('.md') || name.endsWith('.txt') || name.endsWith('.json') || name.endsWith('.csv')) return true;
+      return false;
     }
 
     // ══════════════════════════════════
@@ -1242,6 +1343,9 @@ print(&quot;hello&quot;)
     // ══════════════════════════════════
     function openPost(id) {
       const p = posts.find(x => x.id === id); if(!p) return;
+      readingPostId = id;
+      modalFullscreen = false;
+      document.getElementById('modal-overlay').classList.remove('fullscreen');
       document.getElementById('modal-inner').innerHTML =
         `<h2>${escHtml(p.title)}</h2>` +
         `<div class="modal-meta">` +
@@ -1256,7 +1360,74 @@ print(&quot;hello&quot;)
     function closeReadModal(e) {
       if(e && e.target!==document.getElementById('modal-overlay') && !e.target.classList.contains('modal-close')) return;
       document.getElementById('modal-overlay').classList.remove('open');
+      document.getElementById('modal-overlay').classList.remove('fullscreen');
+      modalFullscreen = false;
+      readingPostId = null;
       document.body.style.overflow = '';
+    }
+
+    function editCurrentPost() {
+      if (readingPostId === null) return;
+      const id = readingPostId;
+      closeReadModal();
+      openEditor(id);
+    }
+
+    function toggleModalFullscreen() {
+      modalFullscreen = !modalFullscreen;
+      document.getElementById('modal-overlay').classList.toggle('fullscreen', modalFullscreen);
+      // Also try native Fullscreen API on the overlay element
+      const overlay = document.getElementById('modal-overlay');
+      try {
+        if (modalFullscreen) {
+          if (overlay.requestFullscreen) overlay.requestFullscreen();
+        } else {
+          if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+        }
+      } catch (err) {}
+    }
+
+    // View attachment by index in the currently open post
+    function viewAttachmentByIndex(idx) {
+      if (readingPostId === null) return;
+      const p = posts.find(x => x.id === readingPostId); if (!p) return;
+      const a = p.attachments[idx]; if (!a) return;
+      openViewer(a);
+    }
+
+    function openViewer(a) {
+      const overlay = document.getElementById('viewer-overlay');
+      const body = document.getElementById('viewer-body');
+      const title = document.getElementById('viewer-title');
+      const download = document.getElementById('viewer-download');
+      title.textContent = '📄 ' + a.name;
+      download.href = a.data;
+      download.download = a.name;
+
+      const t = (a.type || '').toLowerCase();
+      const name = (a.name || '').toLowerCase();
+      if (t.startsWith('image/') || name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.gif') || name.endsWith('.webp')) {
+        body.innerHTML = `<img src="${a.data}" alt="${escHtml(a.name)}" />`;
+      } else if (t === 'application/pdf' || name.endsWith('.pdf')) {
+        body.innerHTML = `<iframe src="${a.data}" title="${escHtml(a.name)}"></iframe>`;
+      } else {
+        // Text / markdown / code
+        try {
+          const text = a.data.split(',')[1] ? atob(a.data.split(',')[1]) : a.data;
+          body.innerHTML = `<pre>${escHtml(text)}</pre>`;
+        } catch (err) {
+          body.innerHTML = `<p style="color:var(--text3);text-align:center;">无法预览该文件类型，请点击右上角下载查看。</p>`;
+        }
+      }
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeViewer() {
+      document.getElementById('viewer-overlay').classList.remove('open');
+      if (!document.getElementById('modal-overlay').classList.contains('open')) {
+        document.body.style.overflow = '';
+      }
     }
 
     // ══════════════════════════════════
@@ -1266,10 +1437,23 @@ print(&quot;hello&quot;)
     renderAll();
     setupDragDrop();
 
-    // Keyboard shortcut: Cmd/Ctrl+N to open editor
+    // Keyboard shortcut: Cmd/Ctrl+N to open editor, Esc to close viewer
     document.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'n' && !document.getElementById('editor-overlay').classList.contains('open')) {
         e.preventDefault(); openEditor(null, e);
+      }
+      if (e.key === 'Escape') {
+        if (document.getElementById('viewer-overlay').classList.contains('open')) {
+          e.preventDefault(); closeViewer();
+        }
+      }
+    });
+
+    // Sync modal fullscreen class when user exits native fullscreen via Esc
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        document.getElementById('modal-overlay').classList.remove('fullscreen');
+        modalFullscreen = false;
       }
     });
   </script>
