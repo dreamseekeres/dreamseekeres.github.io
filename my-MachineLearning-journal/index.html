@@ -4,24 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ML 学习日志 | Yibo Wang</title>
-  <meta name="description" content="王艺博的机器学习学习日志 — 强化学习、具身智能、论文笔记" />
+  <meta name="description" content="王艺博的机器学习日志 — 强化学习、具身智能、论文笔记" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0d0f14;
-      --bg2: #13161e;
-      --bg3: #1a1e28;
-      --border: rgba(255,255,255,0.07);
-      --border-hover: rgba(255,255,255,0.15);
-      --text: #e8eaf0;
-      --text2: #9098ad;
-      --text3: #5a6278;
-      --accent: #34d399;
-      --accent2: #4f8ef7;
-      --accent3: #7b5cf0;
-      --accent4: #f59e0b;
+      --bg: #0d0f14; --bg2: #13161e; --bg3: #1a1e28;
+      --border: rgba(255,255,255,0.07); --border-hover: rgba(255,255,255,0.15);
+      --text: #e8eaf0; --text2: #9098ad; --text3: #5a6278;
+      --accent: #34d399; --accent2: #4f8ef7; --accent3: #7b5cf0; --accent4: #f59e0b;
       --font-sans: 'Inter', 'Noto Sans SC', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
     }
@@ -29,7 +21,6 @@
     html { scroll-behavior: smooth; }
     body { font-family: var(--font-sans); background: var(--bg); color: var(--text); line-height: 1.7; overflow-x: hidden; }
 
-    /* Ambient */
     .glow-blob { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; opacity: 0.1; }
     .glow-blob.b1 { width: 500px; height: 500px; top: -100px; right: -100px; background: var(--accent); }
     .glow-blob.b2 { width: 400px; height: 400px; bottom: 100px; left: -100px; background: var(--accent2); }
@@ -52,144 +43,251 @@
     .nav-right .home-link:hover { border-color: var(--accent2); color: var(--accent2); }
 
     /* Layout */
-    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 90px 28px 60px; position: relative; z-index: 1; display: grid; grid-template-columns: 260px 1fr; gap: 48px; }
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 90px 28px 60px; position: relative; z-index: 1; display: grid; grid-template-columns: 240px 1fr; gap: 40px; }
 
     /* Sidebar */
     .sidebar { position: sticky; top: 90px; height: fit-content; }
-    .sidebar-section { margin-bottom: 32px; }
-    .sidebar-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3); font-family: var(--font-mono); margin-bottom: 12px; }
-    .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 7px; cursor: pointer; transition: all 0.18s; font-size: 14px; color: var(--text2); text-decoration: none; margin-bottom: 2px; }
+    .sidebar-section { margin-bottom: 28px; }
+    .sidebar-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3); font-family: var(--font-mono); margin-bottom: 10px; }
+    .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 7px; cursor: pointer; transition: all 0.18s; font-size: 14px; color: var(--text2); text-decoration: none; margin-bottom: 2px; }
     .sidebar-link:hover, .sidebar-link.active { background: var(--bg2); color: var(--text); }
     .sidebar-link .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
     .sidebar-link.active .dot { background: var(--accent); }
     .sidebar-link .count { margin-left: auto; font-size: 11px; font-family: var(--font-mono); color: var(--text3); }
-    .tags-cloud { display: flex; flex-wrap: wrap; gap: 7px; }
-    .tag-chip { font-size: 11px; font-family: var(--font-mono); padding: 4px 10px; border-radius: 20px; background: var(--bg2); border: 1px solid var(--border); color: var(--text3); cursor: pointer; transition: all 0.2s; }
+    .tags-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag-chip { font-size: 11px; font-family: var(--font-mono); padding: 4px 9px; border-radius: 20px; background: var(--bg2); border: 1px solid var(--border); color: var(--text3); cursor: pointer; transition: all 0.2s; }
     .tag-chip:hover { border-color: var(--accent); color: var(--accent); }
 
-    /* Main content */
-    main {}
-
     /* Blog header */
-    .blog-header { margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
-    .blog-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .blog-title { font-size: 28px; font-weight: 600; letter-spacing: -0.8px; }
-    .new-post-btn { display: flex; align-items: center; gap: 8px; background: var(--accent); color: #0d0f14; border: none; border-radius: 8px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+    .blog-header { margin-bottom: 36px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .blog-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .blog-title { font-size: 26px; font-weight: 600; letter-spacing: -0.6px; }
+    .new-post-btn {
+      display: inline-flex; align-items: center; gap: 8px; background: var(--accent);
+      color: #0d0f14; border: none; border-radius: 8px; padding: 9px 18px;
+      font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none;
+    }
     .new-post-btn:hover { transform: translateY(-1px); opacity: 0.9; }
-    .blog-desc { color: var(--text2); font-size: 15px; max-width: 560px; }
-    .stats-row { display: flex; gap: 32px; margin-top: 20px; }
+    .blog-desc { color: var(--text2); font-size: 14px; max-width: 520px; }
+    .stats-row { display: flex; gap: 28px; margin-top: 16px; }
     .stat { text-align: center; }
     .stat-n { font-size: 22px; font-weight: 600; font-family: var(--font-mono); }
     .stat-l { font-size: 12px; color: var(--text3); margin-top: 2px; }
 
     /* Filter bar */
-    .filter-bar { display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
+    .filter-bar { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
     .filter-btn { font-size: 13px; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; transition: all 0.2s; }
     .filter-btn:hover { border-color: var(--border-hover); color: var(--text); }
     .filter-btn.active { background: rgba(52,211,153,0.1); border-color: rgba(52,211,153,0.4); color: var(--accent); }
 
-    /* Post cards */
-    .post-list { display: flex; flex-direction: column; gap: 16px; }
+    /* Post list */
+    .post-list { display: flex; flex-direction: column; gap: 14px; }
     .post-card {
-      background: var(--bg2); border: 1px solid var(--border);
-      border-radius: 14px; padding: 24px 28px; cursor: pointer;
-      transition: all 0.25s; position: relative; overflow: hidden;
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 14px;
+      padding: 22px 26px; cursor: pointer; transition: all 0.25s; position: relative; overflow: hidden;
     }
-    .post-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; opacity: 0; transition: opacity 0.2s; }
-    .post-card.rl::after { background: linear-gradient(90deg, var(--accent2), var(--accent3)); }
-    .post-card.theory::after { background: linear-gradient(90deg, var(--accent3), var(--accent4)); }
-    .post-card.practice::after { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
-    .post-card.paper::after { background: linear-gradient(90deg, var(--accent4), var(--accent)); }
-    .post-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
-    .post-card:hover::after { opacity: 1; }
-    .post-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
-    .post-date { font-family: var(--font-mono); font-size: 12px; color: var(--text3); }
-    .post-tag { font-size: 11px; font-family: var(--font-mono); padding: 2px 9px; border-radius: 4px; }
-    .post-tag.rl { background: rgba(79,142,247,0.1); color: var(--accent2); }
-    .post-tag.theory { background: rgba(123,92,240,0.1); color: var(--accent3); }
-    .post-tag.practice { background: rgba(52,211,153,0.1); color: var(--accent); }
-    .post-tag.paper { background: rgba(245,158,11,0.1); color: var(--accent4); }
-    .post-title { font-size: 18px; font-weight: 500; margin-bottom: 8px; line-height: 1.4; }
-    .post-summary { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 16px; }
-    .post-footer { display: flex; align-items: center; justify-content: space-between; }
-    .post-tags { display: flex; gap: 8px; flex-wrap: wrap; }
-    .post-chip { font-size: 11px; color: var(--text3); background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; }
-    .read-more { font-size: 13px; color: var(--accent); font-weight: 500; display: flex; align-items: center; gap: 4px; }
+    .post-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; opacity:0; transition:opacity .2s; }
+    .post-card.rl::after{background:linear-gradient(90deg,var(--accent2),var(--accent3));}
+    .post-card.theory::after{background:linear-gradient(90deg,var(--accent3),var(--accent4));}
+    .post-card.practice::after{background:linear-gradient(90deg,var(--accent),var(--accent2));}
+    .post-card.paper::after{background:linear-gradient(90deg,var(--accent4),var(--accent));}
+    .post-card:hover{border-color:var(--border-hover);transform:translateY(-2px);}
+    .post-card:hover::after{opacity:1;}
+    .post-meta{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
+    .post-date{font-family:var(--font-mono);font-size:12px;color:var(--text3);}
+    .post-tag{font-size:11px;font-family:var(--font-mono);padding:2px 9px;border-radius:4px;}
+    .post-tag.rl{background:rgba(79,142,247,0.1);color:var(--accent2);}
+    .post-tag.theory{background:rgba(123,92,240,0.1);color:var(--accent3);}
+    .post-tag.practice{background:rgba(52,211,153,0.1);color:var(--accent);}
+    .post-tag.paper{background:rgba(245,158,11,0.1);color:var(--accent4);}
+    .post-title{font-size:17px;font-weight:500;margin-bottom:6px;line-height:1.4;}
+    .post-summary{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:14px;}
+    .post-footer{display:flex;align-items:center;justify-content:space-between;}
+    .post-tags{display:flex;gap:7px;flex-wrap:wrap;}
+    .post-chip{font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:2px 8px;}
+    .read-more{font-size:13px;color:var(--accent);font-weight:500;display:flex;align-items:center;gap:4px;}
 
-    /* Empty state */
-    .empty-state { text-align: center; padding: 60px 20px; }
-    .empty-icon { font-size: 48px; margin-bottom: 16px; }
-    .empty-title { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
-    .empty-desc { font-size: 14px; color: var(--text2); }
+    .empty-state{text-align:center;padding:60px 20px;}
+    .empty-icon{font-size:48px;margin-bottom:16px;}
+    .empty-title{font-size:18px;font-weight:500;margin-bottom:8px;}
+    .empty-desc{font-size:14px;color:var(--text2);}
 
-    /* Post Modal */
-    .modal-overlay {
-      position: fixed; inset: 0; z-index: 200;
-      background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
-      display: none; align-items: flex-start; justify-content: center;
-      padding: 60px 20px;
+    /* ── Fullscreen Editor Modal (CodMD-style) ── */
+    .editor-overlay {
+      position: fixed; inset: 0; z-index: 200; display: none;
+      background: var(--bg);
     }
-    .modal-overlay.open { display: flex; }
-    .modal {
-      background: var(--bg2); border: 1px solid var(--border-hover);
-      border-radius: 16px; padding: 40px; max-width: 720px; width: 100%;
-      max-height: 80vh; overflow-y: auto; position: relative;
-    }
-    .modal-close { position: absolute; top: 20px; right: 20px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; color: var(--text2); cursor: pointer; font-size: 14px; }
-    .modal-close:hover { color: var(--text); }
-    .modal h2 { font-size: 24px; font-weight: 600; margin-bottom: 12px; line-height: 1.3; }
-    .modal-meta { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
-    .modal-content { font-size: 15px; line-height: 1.9; color: var(--text2); }
-    .modal-content h3 { font-size: 17px; font-weight: 500; color: var(--text); margin: 24px 0 10px; }
-    .modal-content p { margin-bottom: 14px; }
-    .modal-content code { font-family: var(--font-mono); font-size: 13px; background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; color: var(--accent); }
-    .modal-content pre { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin: 14px 0; overflow-x: auto; }
-    .modal-content pre code { background: none; border: none; padding: 0; font-size: 13px; color: var(--text); }
-    .modal-content ul, .modal-content ol { padding-left: 24px; margin-bottom: 14px; }
-    .modal-content li { margin-bottom: 6px; }
-    .modal-content .highlight { background: rgba(52,211,153,0.08); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 14px 0; }
+    .editor-overlay.open { display: flex; flex-direction: column; }
 
-    /* New post form */
-    .new-post-form { display: none; background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 28px; margin-bottom: 24px; }
-    .new-post-form.open { display: block; }
-    .form-title { font-size: 16px; font-weight: 500; margin-bottom: 20px; }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { font-size: 13px; color: var(--text2); margin-bottom: 6px; display: block; }
-    .form-group input, .form-group textarea, .form-group select {
-      width: 100%; background: var(--bg3); border: 1px solid var(--border);
-      border-radius: 8px; padding: 10px 14px; color: var(--text); font-family: var(--font-sans);
-      font-size: 14px; outline: none; transition: border-color 0.2s; resize: vertical;
+    .editor-toolbar {
+      flex-shrink: 0; display: flex; align-items: center; gap: 12px;
+      padding: 10px 16px; border-bottom: 1px solid var(--border);
+      background: rgba(19,22,30,0.95); backdrop-filter: blur(12px);
+      z-index: 201;
     }
-    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent); }
-    .form-group textarea { min-height: 180px; }
-    .form-actions { display: flex; gap: 12px; justify-content: flex-end; }
-    .btn-cancel { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); padding: 9px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; }
-    .btn-cancel:hover { color: var(--text); }
-    .btn-save { background: var(--accent); border: none; color: #0d0f14; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
-    .btn-save:hover { opacity: 0.9; }
+    .et-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+    .et-icon { font-size: 17px; }
+    .et-title-input {
+      background: transparent; border: none; outline: none;
+      color: var(--text); font-size: 15px; font-weight: 600;
+      width: 280px; font-family: var(--font-sans);
+    }
+    .et-title-input::placeholder { color: var(--text3); }
+    .et-meta-row { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .et-select {
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text2); font-size: 12px; padding: 5px 10px;
+      outline: none; font-family: var(--font-sans); cursor: pointer;
+    }
+    .et-select:focus { border-color: var(--accent); }
+    .et-tag-input {
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text2); font-size: 12px; padding: 5px 10px; width: 180px;
+      outline: none; font-family: var(--font-sans);
+    }
+    .et-tag-input:focus { border-color: var(--accent); }
+    .et-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .et-status { font-family: var(--font-mono); font-size: 11px; color: var(--accent3); padding: 4px 10px;
+      background: rgba(52,211,153,0.08); border-radius: 20px; white-space: nowrap; }
+    .et-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 7px; border: none; font-size: 13px;
+      font-weight: 500; cursor: pointer; transition: all 0.18s; font-family: var(--font-sans);
+    }
+    .et-save { background: var(--accent); color: #0d0f14; }
+    .et-save:hover { opacity: 0.9; }
+    .et-cancel { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+    .et-cancel:hover { color: var(--text); border-color: var(--border-hover); }
+    .et-fs-toggle {
+      background: transparent; border: 1px solid var(--border); color: var(--text3);
+      padding: 6px 10px; border-radius: 7px; cursor: pointer; font-size: 13px;
+      transition: all 0.18s; line-height: 1;
+    }
+    .et-fs-toggle:hover { color: var(--text); border-color: var(--border-hover); }
 
-    @media (max-width: 768px) {
-      .page-wrap { grid-template-columns: 1fr; }
-      .sidebar { position: static; }
+    .editor-body { flex: 1; display: flex; overflow: hidden; }
+    .ed-pane {
+      flex: 1; display: flex; flex-direction: column; overflow: hidden;
+      min-width: 0; border-right: 1px solid var(--border);
+    }
+    .ed-pane:last-child { border-right: none; }
+    .ed-label {
+      padding: 6px 16px; font-size: 11px; font-family: var(--font-mono);
+      color: var(--text3); text-transform: uppercase; letter-spacing: 1px;
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+      user-select: none; display: flex; align-items: center; gap: 8px;
+      flex-shrink: 0;
+    }
+    .ed-editor-area { flex: 1; overflow: hidden; position: relative; }
+    .ed-textarea {
+      position: absolute; inset: 0; resize: none;
+      background: transparent; border: none; outline: none;
+      color: var(--text); font-size: 14px; line-height: 1.75;
+      padding: 16px 20px; font-family: var(--font-mono);
+      tab-size: 2; -moz-tab-size: 2;
+      caret-color: var(--accent);
+      overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--bg3) transparent;
+    }
+    .ed-preview-area { flex: 1; overflow-y: auto; padding: 16px 24px; background: var(--bg); }
+    .ed-preview-area::-webkit-scrollbar { width: 6px; }
+    .ed-preview-area::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+
+    /* Preview rendered styles */
+    .pv h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.5px; margin: 0 0 16px; color: var(--text); }
+    .pv h2 { font-size: 20px; font-weight: 600; margin: 28px 0 12px; color: var(--text); padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .pv h3 { font-size: 17px; font-weight: 500; margin: 22px 0 10px; color: var(--text); }
+    .pv p { font-size: 14px; line-height: 1.85; color: var(--text2); margin-bottom: 14px; }
+    .pv strong { color: var(--text); font-weight: 500; }
+    .pv code {
+      font-family: var(--font-mono); font-size: 13px;
+      background: rgba(79,142,247,0.08); border: 1px solid rgba(79,142,247,0.15);
+      border-radius: 4px; padding: 1px 6px; color: var(--accent2);
+    }
+    .pv pre {
+      background: #0a0c10; border: 1px solid var(--border); border-radius: 10px;
+      padding: 18px 20px; margin: 14px 0; overflow-x: auto; position: relative;
+    }
+    .pv pre code {
+      background: none; border: none; padding: 0; font-size: 13px;
+      color: var(--text2); line-height: 1.65;
+    }
+    .pv pre::before {
+      content: attr(data-lang);
+      position: absolute; top: 8px; right: 12px;
+      font-size: 10px; font-family: var(--font-mono); color: var(--text3);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .pv ul, .pv ol { padding-left: 24px; margin-bottom: 14px; }
+    .pv li { font-size: 14px; color: var(--text2); line-height: 1.75; margin-bottom: 5px; }
+    .pv li strong { color: var(--text); }
+    .pv blockquote {
+      border-left: 3px solid var(--accent); background: rgba(52,211,153,0.04);
+      padding: 12px 18px; border-radius: 0 8px 8px 0; margin: 14px 0;
+      color: var(--text2); font-size: 14px; line-height: 1.75;
+    }
+    .pv img {
+      max-width: 100%; border-radius: 10px; border: 1px solid var(--border);
+      margin: 14px 0; display: block;
+    }
+    .pv hr { border: none; height: 1px; background: var(--border); margin: 28px 0; }
+    .pv table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
+    .pv th, .pv td { padding: 8px 14px; border: 1px solid var(--border); text-align: left; }
+    .pv th { background: var(--bg2); color: var(--text); font-weight: 500; font-size: 12px; }
+    .pv td { color: var(--text2); }
+    .pv a { color: var(--accent2); text-decoration: none; }
+    .pv a:hover { text-decoration: underline; }
+
+    /* Image placeholder in editor */
+    .img-placeholder-hint {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(245,158,11,0.06); border: 1px dashed rgba(245,158,11,0.35);
+      border-radius: 6px; padding: 4px 10px; font-size: 12px; color: var(--accent4);
+      font-family: var(--font-mono); vertical-align: middle; margin: 4px 0;
+    }
+
+    /* ── Read modal ── */
+    .modal-overlay{
+      position:fixed;inset:0;z-index:190;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);
+      display:none;align-items:flex-start;justify-content:center;padding:60px 20px;
+    }
+    .modal-overlay.open{display:flex;}
+    .modal{
+      background:var(--bg2);border:1px solid var(--border-hover);border-radius:16px;
+      padding:40px;max-width:720px;width:100%;max-height:80vh;overflow-y:auto;position:relative;
+    }
+    .modal-close{position:absolute;top:20px;right:20px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 12px;color:var(--text2);cursor:pointer;font-size:14px;}
+    .modal-close:hover{color:var(--text);}
+    .modal h2{font-size:24px;font-weight:600;margin-bottom:12px;line-height:1.3;}
+    .modal-meta{display:flex;gap:12px;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+    .modal-content{font-size:15px;line-height:1.9;color:var(--text2);}
+    .modal-content h3{font-size:17px;font-weight:500;color:var(--text);margin:24px 0 10px;}
+    .modal-content p{margin-bottom:14px;}
+    .modal-content code{font-family:var(--font-mono);font-size:13px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--accent);}
+    .modal-content pre{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px;margin:14px 0;overflow-x:auto;}
+    .modal-content pre code{background:none;border:none;padding:0;font-size:13px;color:var(--text);}
+    .modal-content ul,.modal-content ol{padding-left:24px;margin-bottom:14px;}
+    .modal-content li{margin-bottom:6px;}
+    .modal-content img{max-width:100%;border-radius:8px;border:1px solid var(--border);margin:14px 0;}
+
+    @media(max-width:768px){
+      .page-wrap{grid-template-columns:1fr;} .sidebar{position:static;}
+      .editor-body{flex-direction:column;}
+      .ed-pane{min-height:40vh; border-right:none !important; border-bottom:1px solid var(--border);}
     }
   </style>
 </head>
 <body>
-  <div class="glow-blob b1"></div>
-  <div class="glow-blob b2"></div>
+  <div class="glow-blob b1"></div><div class="glow-blob b2"></div>
 
   <!-- NAV -->
   <nav>
     <div class="nav-inner">
       <a class="nav-brand" href="./index.html">
         <div class="nav-brand-icon">📔</div>
-        <div>
-          <div class="nav-brand-text">ML 学习日志</div>
-          <div class="nav-brand-sub">my-MachineLearning-journal</div>
-        </div>
+        <div><div class="nav-brand-text">ML 学习日志</div><div class="nav-brand-sub">my-MachineLearning-journal</div></div>
       </a>
       <div class="nav-right">
-        <a href="#" onclick="toggleNewPost(event)">写日志</a>
+        <a href="#" onclick="openEditor()">写日志</a>
         <a href="#" onclick="filterPosts('all', this)">全部</a>
         <a href="../index.html" class="home-link">← 返回主页</a>
       </div>
@@ -201,21 +299,11 @@
     <aside class="sidebar">
       <div class="sidebar-section">
         <div class="sidebar-title">分类</div>
-        <a class="sidebar-link active" onclick="filterPosts('all', this)">
-          <span class="dot"></span>全部日志<span class="count" id="count-all">0</span>
-        </a>
-        <a class="sidebar-link" onclick="filterPosts('rl', this)">
-          <span class="dot"></span>强化学习<span class="count" id="count-rl">0</span>
-        </a>
-        <a class="sidebar-link" onclick="filterPosts('theory', this)">
-          <span class="dot"></span>理论笔记<span class="count" id="count-theory">0</span>
-        </a>
-        <a class="sidebar-link" onclick="filterPosts('practice', this)">
-          <span class="dot"></span>实战记录<span class="count" id="count-practice">0</span>
-        </a>
-        <a class="sidebar-link" onclick="filterPosts('paper', this)">
-          <span class="dot"></span>论文阅读<span class="count" id="count-paper">0</span>
-        </a>
+        <a class="sidebar-link active" onclick="filterPosts('all',this)"><span class="dot"></span>全部日志<span class="count" id="count-all">0</span></a>
+        <a class="sidebar-link" onclick="filterPosts('rl',this)"><span class="dot"></span>强化学习<span class="count" id="count-rl">0</span></a>
+        <a class="sidebar-link" onclick="filterPosts('theory',this)"><span class="dot"></span>理论笔记<span class="count" id="count-theory">0</span></a>
+        <a class="sidebar-link" onclick="filterPosts('practice',this)"><span class="dot"></span>实战记录<span class="count" id="count-practice">0</span></a>
+        <a class="sidebar-link" onclick="filterPosts('paper',this)"><span class="dot"></span>论文阅读<span class="count" id="count-paper">0</span></a>
       </div>
       <div class="sidebar-section">
         <div class="sidebar-title">常用标签</div>
@@ -223,17 +311,14 @@
       </div>
       <div class="sidebar-section">
         <div class="sidebar-title">关于此博客</div>
-        <p style="font-size:13px;color:var(--text3);line-height:1.7;">记录机器学习与具身智能的学习历程、踩坑笔记和论文心得。持续更新中。</p>
+        <p style="font-size:13px;color:var(--text3);line-height:1.7;">记录机器学习与具身智能的学习历程、踩坑笔记和论文心得。支持 Markdown 实时预览。</p>
       </div>
     </aside>
 
     <!-- MAIN -->
     <main>
       <div class="blog-header">
-        <div class="blog-header-top">
-          <div class="blog-title">学习日志</div>
-          <a href="#" onclick="toggleNewPost(event)" class="new-post-btn">+ 写新日志</a>
-        </div>
+        <div class="blog-header-top"><div class="blog-title">学习日志</div><a href="#" onclick="openEditor()" class="new-post-btn">+ 写新日志</a></div>
         <p class="blog-desc">记录机器学习与强化学习的学习历程、具身智能研究中的技术探索与踩坑笔记。</p>
         <div class="stats-row">
           <div class="stat"><div class="stat-n" id="total-posts">0</div><div class="stat-l">篇日志</div></div>
@@ -242,69 +327,94 @@
         </div>
       </div>
 
-      <!-- New post form -->
-      <div class="new-post-form" id="new-post-form">
-        <div class="form-title">✍️ 写新日志</div>
-        <div class="form-group">
-          <label>标题</label>
-          <input type="text" id="form-title" placeholder="今天学了什么？" />
-        </div>
-        <div class="form-group">
-          <label>分类</label>
-          <select id="form-category">
-            <option value="rl">强化学习</option>
-            <option value="theory">理论笔记</option>
-            <option value="practice">实战记录</option>
-            <option value="paper">论文阅读</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>标签（逗号分隔）</label>
-          <input type="text" id="form-tags" placeholder="例如：PPO, IsaacGym, reward design" />
-        </div>
-        <div class="form-group">
-          <label>内容（支持 Markdown 语法）</label>
-          <textarea id="form-content" placeholder="## 今天的收获&#10;&#10;记录你的学习内容、代码片段、心得体会..."></textarea>
-        </div>
-        <div class="form-actions">
-          <button class="btn-cancel" onclick="toggleNewPost(event)">取消</button>
-          <button class="btn-save" onclick="savePost()">保存日志</button>
-        </div>
-      </div>
-
-      <!-- Filter bar -->
       <div class="filter-bar">
-        <button class="filter-btn active" onclick="filterPosts('all', this)">全部</button>
-        <button class="filter-btn" onclick="filterPosts('rl', this)">强化学习</button>
-        <button class="filter-btn" onclick="filterPosts('theory', this)">理论笔记</button>
-        <button class="filter-btn" onclick="filterPosts('practice', this)">实战记录</button>
-        <button class="filter-btn" onclick="filterPosts('paper', this)">论文阅读</button>
+        <button class="filter-btn active" onclick="filterPosts('all',this)">全部</button>
+        <button class="filter-btn" onclick="filterPosts('rl',this)">强化学习</button>
+        <button class="filter-btn" onclick="filterPosts('theory',this)">理论笔记</button>
+        <button class="filter-btn" onclick="filterPosts('practice',this)">实战记录</button>
+        <button class="filter-btn" onclick="filterPosts('paper',this)">论文阅读</button>
       </div>
 
-      <!-- Post list -->
       <div class="post-list" id="post-list"></div>
     </main>
   </div>
 
-  <!-- Post modal -->
-  <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <!-- ── Fullscreen Editor Overlay ── -->
+  <div class="editor-overlay" id="editor-overlay">
+    <!-- Toolbar -->
+    <div class="editor-toolbar">
+      <div class="et-left">
+        <span class="et-icon">✏️</span>
+        <input class="et-title-input" id="ed-title" placeholder="标题（必填）..." spellcheck="false" />
+        <div class="et-meta-row">
+          <select class="et-select" id="ed-category">
+            <option value="rl">强化学习</option><option value="theory">理论笔记</option>
+            <option value="practice">实战记录</option><option value="paper">论文阅读</option>
+          </select>
+          <input class="et-tag-input" id="ed-tags" placeholder="标签，逗号分隔" />
+          <span class="et-status" id="ed-status">已保存</span>
+        </div>
+      </div>
+      <div class="et-right">
+        <button class="et-fs-toggle" onclick="toggleFullscreen()" title="全屏切换" id="fs-btn">⛶ 全屏</button>
+        <button class="et-btn et-cancel" onclick="closeEditor(false)">取消</button>
+        <button class="et-btn et-save" onclick="savePostFromEditor()">保存发布</button>
+      </div>
+    </div>
+
+    <!-- Editor Body -->
+    <div class="editor-body" id="editor-body">
+      <!-- Left: Editor -->
+      <div class="ed-pane" id="ed-pane-edit">
+        <div class="ed-label">✎ 编辑区 &nbsp;<span style="color:var(--text3);font-weight:400;">— 支持 Ctrl+V 粘贴图片，Tab 缩进</span></div>
+        <div class="ed-editor-area">
+          <textarea class="ed-textarea" id="ed-source"
+            placeholder="# 今天学了什么？
+
+在这里用 **Markdown** 记录你的学习内容：
+
+## 核心概念
+
+- 第一点
+- 第二点
+
+\`\`\`python
+# 代码片段
+print(&quot;hello&quot;)
+\`\`\`
+
+**提示：直接在编辑器中 Ctrl+V 粘贴图片即可！**"></textarea>
+        </div>
+      </div>
+      <!-- Right: Live Preview -->
+      <div class="ed-pane" id="ed-pane-prev">
+        <div class="ed-label">👁 预览 &nbsp;<span style="color:var(--text3);font-weight:400;">实时渲染</span></div>
+        <div class="ed-preview-area pv" id="ed-preview">
+          <p style="color:var(--text3);padding:40px 0;text-align:center;">开始输入 Markdown 内容，这里会即时显示渲染结果...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Read modal -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeReadModal(event)">
     <div class="modal" id="modal-content">
-      <button class="modal-close" onclick="closeModal()">关闭 ✕</button>
+      <button class="modal-close" onclick="closeReadModal()">关闭 ✕</button>
       <div id="modal-inner"></div>
     </div>
   </div>
 
   <script>
-    // ── Default posts data ──
+    // ══════════════════════════════════
+    // Default posts data
+    // ══════════════════════════════════
     const DEFAULT_POSTS = [
       {
-        id: 1,
-        title: "IsaacGym 环境搭建：从零开始的踩坑记录",
-        category: "practice",
-        date: "2026-06-15",
-        summary: "记录在 Ubuntu 24.04 + RTX 3050 上搭建 IsaacGym 环境的全过程，包括 Conda 依赖冲突解决、LD_LIBRARY_PATH 设置以及 GPU 渲染问题排查。",
-        tags: ["IsaacGym", "Ubuntu", "环境配置", "CUDA"],
-        content: `## 环境信息
+        id:1,title:'IsaacGym 环境搭建：从零开始的踩坑记录',category:'practice',
+        date:'2026-06-15',
+        summary:'记录在 Ubuntu 24.04 + RTX 3050 上搭建 IsaacGym 环境的全过程，包括 Conda 依赖冲突解决、LD_LIBRARY_PATH 设置以及 GPU 渲染问题排查。',
+        tags:['IsaacGym','Ubuntu','环境配置','CUDA'],
+        content:`## 环境信息
 
 - OS: Ubuntu 24.04 LTS
 - GPU: RTX 3050 + Intel Iris Xe (双显卡)
@@ -334,55 +444,55 @@ __NV_PRIME_RENDER_OFFLOAD=0 __GLX_VENDOR_LIBRARY_NAME=intel python train.py
 headless 模式（加 \`--headless\` 参数）训练时不存在 GPU 渲染冲突，推荐在正式训练时使用 headless。`
       },
       {
-        id: 2,
-        title: "PPO 算法深度解析：从理论到 rsl_rl 实现",
-        category: "theory",
-        date: "2026-06-10",
-        summary: "深入理解 Proximal Policy Optimization（PPO）算法的核心机制，结合 rsl_rl 库的具体实现，分析 clip ratio、GAE 优势估计和 entropy bonus 的作用。",
-        tags: ["PPO", "强化学习", "rsl_rl", "策略梯度"],
-        content: `## PPO 的核心思想
+        id:2,title:'PPO 算法深度解析：从理论到 rsl_rl 实现',category:'theory',
+        date:'2026-06-10',
+        summary:'深入理解 Proximal Policy Optimization（PPO）算法的核心机制，结合 rsl_rl 库的具体实现，分析 clip ratio、GAE 优势估计和 entropy bonus 的作用。',
+        tags:['PPO','强化学习','rsl_rl','策略梯度'],
+        content:`## PPO 的核心思想
 
 PPO 是目前机器人强化学习中最常用的算法之一，核心思想是通过**截断（clipping）**来约束策略更新步长，避免更新过大导致训练不稳定。
 
-## Clip Objective
+### Clip Objective
 
 \`\`\`python
 ratio = pi(a|s) / pi_old(a|s)
 L_clip = min(ratio * A, clip(ratio, 1-eps, 1+eps) * A)
 \`\`\`
 
-其中 \`eps\` 通常设为 0.2。
+其中 \`eps\` 通常设为 **0.2**。
 
-## GAE 优势估计
+### GAE 优势估计
 
 Generalized Advantage Estimation (GAE) 通过引入 \`lambda\` 参数平衡偏差和方差：
 
-- \`lambda = 0\`：一步 TD，低方差高偏差
-- \`lambda = 1\`：Monte Carlo，高方差低偏差
-- rsl_rl 默认 \`lambda = 0.95\`
+| lambda | 效果 |
+|--------|------|
+| 0 | 一步 TD，低方差高偏差 |
+| 1 | Monte Carlo，高方差低偏差 |
+| 0.95 | rsl_rl 默认值（推荐） |
 
 ## 在 IsaacGym 中的体会
 
-并行环境数量（\`num_envs\`）是影响样本效率的关键参数。4096 个并行环境下，一次 rollout 就能收集大量样本，显著加速训练。`
+并行环境数量（\`num_envs\`）是影响样本效率的关键参数。**4096 个并行环境**下，一次 rollout 就能收集大量样本，显著加速训练。
+
+\`rsl_rl\` 的实现还加入了 **value loss clip** 和 **entropy bonus**，这些对训练稳定性至关重要。`
       },
       {
-        id: 3,
-        title: "Curriculum Learning 在抛球任务中的设计与调优",
-        category: "rl",
-        date: "2026-06-05",
-        summary: "记录 B2Z1 精准抛球任务中 curriculum learning 的设计思路：从近距离逐步扩展至 8m 目标，以及 MinDist 参数调整对训练稳定性的影响。",
-        tags: ["Curriculum Learning", "B2Z1", "IsaacGym", "奖励函数"],
-        content: `## 问题背景
+        id:3,title:'Curriculum Learning 在抛球任务中的设计与调优',category:'rl',
+        date:'2026-06-05',
+        summary:'记录 B2Z1 精准抛球任务中 curriculum learning 的设计思路：从近距离逐步扩展至 8m 目标，以及 MinDist 参数调整对训练稳定性的影响。',
+        tags:['Curriculum Learning','B2Z1','IsaacGym','奖励函数'],
+        content:`## 问题背景
 
-在 \`b2z1_throw_precise.py\` 中，训练到 5m 距离就陷入瓶颈，无法继续晋级。经分析，主要问题有：
+在 \`b2z1_throw_precise.py\` 中，训练到 **5m 距离就陷入瓶颈**，无法继续晋级。经分析，主要问题有：
 
 1. **target_reward 设计问题**：原来对所有目标帧都发奖励，导致多目标干扰
 2. **投掷插值时间过短**：影响抛球质量
 3. **robot_base_pos 未更新**：导致 curriculum 距离计算偏差
 
-## 修复方案
+### 修复方案
 
-### 1. target_reward 只奖励最近目标帧
+#### 1. target_reward 只奖励最近目标帧
 
 \`\`\`python
 # Before: 对所有目标帧发奖励
@@ -391,33 +501,32 @@ nearest_target_idx = torch.argmin(dist_to_targets, dim=-1)
 target_reward = reach_goal_bonus[nearest_target_idx]
 \`\`\`
 
-### 2. MinDist 参数调整
+#### 2. MinDist 参数调整
 
-从 UR5e 的经验迁移：将 MinDist 从 8.0 改为 4.0，训练范围扩展至 4m-8m，避免 curriculum 过拟合近距离。
+从 UR5e 的经验迁移：将 MinDist 从 8.0 改为 **4.0**，训练范围扩展至 **4m–8m**，避免 curriculum 过拟合近距离。
 
-## KF_JOINT6_TARGET 对齐
+### KF_JOINT6_TARGET 对齐
 
 将 \`KF_JOINT6_TARGET\` 设为 3.3（与 \`handball_throw_fixed.py\` 对齐），释放关节活动范围，改善抛球姿态。`
       },
       {
-        id: 4,
-        title: "论文阅读：《Learning to Walk in Minutes Using Massively Parallel Deep RL》",
-        category: "paper",
-        date: "2026-05-28",
-        summary: "阅读 NVIDIA 的 legged robot locomotion 经典论文，理解 massively parallel simulation 在足式机器人训练中的作用，以及其与 B2Z1 Locomotion Teacher 的关联。",
-        tags: ["论文", "Locomotion", "并行仿真", "足式机器人"],
-        content: `## 论文概述
+        id:4,title:'论文阅读：《Learning to Walk in Minutes》',category:'paper',
+        date:'2026-05-28',
+        summary:'阅读 NVIDIA 的 legged robot locomotion 经典论文，理解 massively parallel simulation 在足式机器人训练中的作用。',
+        tags:['论文','Locomotion','并行仿真','足式机器人'],
+        content:`## 论文概述
 
-**标题**：Learning to Walk in Minutes Using Massively Parallel Deep Reinforcement Learning  
-**作者**：Rudin et al. (NVIDIA, ETH Zurich)  
-**贡献**：通过大规模并行仿真（4096 environments），在几分钟内训练出能在真实四足机器人上迁移的运动策略。
+| 字段 | 值 |
+|------|-----|
+| 标题 | Learning to Walk in Minutes Using Massively Parallel Deep RL |
+| 作者 | Rudin et al. (NVIDIA, ETH Zurich) |
 
-## 核心技术
+核心贡献：通过大规模并行仿真（**4096 environments**），在几分钟内训练出能在真实四足机器人上迁移的运动策略。
 
-### 1. Massively Parallel Simulation
-利用 IsaacGym 的 GPU 并行能力同时运行 4096 个仿真环境，数据收集速度比 CPU 仿真快 1000 倍以上。
+## 技术要点
 
-### 2. Observation Space 设计
+### 1. Observation Space 设计
+
 - Base angular velocity × 0.25
 - Projected gravity
 - Commands (vx, vy, omega)
@@ -425,15 +534,16 @@ target_reward = reach_goal_bonus[nearest_target_idx]
 - Joint velocity × 0.05
 - Previous actions
 
-与我们的 B2Z1 (45维) 和 G1 (47维) 观测空间设计高度吻合。
+与 B2Z1 (45维) 和 G1 (47维) 观测空间设计高度吻合。
 
-### 3. Curriculum 设计
-通过自适应 curriculum 动态调整地形难度，让策略逐渐学会在复杂地形上行走。
+### 2. Curriculum 自适应地形难度
+
+通过自适应 curriculum 动态调整地形难度，让策略逐渐学会复杂地形行走。
 
 ## 与 B2Z1 的对比
 
 | 项目 | 论文 | B2Z1 |
-|------|------|-------|
+|------|------|------|
 | 观测维度 | 45 | 45 |
 | 动作维度 | 12 | 11 (移除 j5) |
 | vx max | 1.0 m/s | 2.0 m/s |
@@ -444,189 +554,418 @@ target_reward = reach_goal_bonus[nearest_target_idx]
       }
     ];
 
-    // ── State ──
+    // ══════════════════════════════════
+    // State
+    // ══════════════════════════════════
     let currentFilter = 'all';
     let posts = [];
+    let editPostId = null; // null = new post, number = editing existing post
+    let isFullscreen = false;
+    let savedImages = [];   // base64 images stored for this session's post
+    let previewDebounce;
 
     function loadPosts() {
       const saved = localStorage.getItem('ml_journal_posts');
-      if (saved) {
-        try { posts = JSON.parse(saved); }
-        catch { posts = [...DEFAULT_POSTS]; }
-      } else {
-        posts = [...DEFAULT_POSTS];
-      }
+      if (saved) { try { posts = JSON.parse(saved); } catch { posts = [...DEFAULT_POSTS]; } }
+      else { posts = [...DEFAULT_POSTS]; }
     }
-
-    function savePosts() {
-      localStorage.setItem('ml_journal_posts', JSON.stringify(posts));
-    }
-
-    // ── Render ──
-    function renderPosts() {
-      const list = document.getElementById('post-list');
-      const filtered = currentFilter === 'all' ? posts : posts.filter(p => p.category === currentFilter);
-      
-      if (filtered.length === 0) {
-        list.innerHTML = `<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-title">还没有日志</div><div class="empty-desc">点击"写新日志"开始记录你的学习旅程</div></div>`;
-        return;
-      }
-
-      list.innerHTML = filtered.map(p => `
-        <div class="post-card ${p.category}" onclick="openPost(${p.id})">
-          <div class="post-meta">
-            <span class="post-date">${p.date}</span>
-            <span class="post-tag ${p.category}">${categoryLabel(p.category)}</span>
-          </div>
-          <div class="post-title">${escHtml(p.title)}</div>
-          <div class="post-summary">${escHtml(p.summary)}</div>
-          <div class="post-footer">
-            <div class="post-tags">${p.tags.slice(0,4).map(t => `<span class="post-chip">${escHtml(t)}</span>`).join('')}</div>
-            <span class="read-more">阅读全文 →</span>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function renderStats() {
-      document.getElementById('total-posts').textContent = posts.length;
-      const allTags = new Set(posts.flatMap(p => p.tags));
-      document.getElementById('total-tags').textContent = allTags.size;
-      const dates = posts.map(p => p.date).sort().reverse();
-      document.getElementById('last-update').textContent = dates[0] ? dates[0].slice(5) : '—';
-
-      const counts = { all: posts.length, rl: 0, theory: 0, practice: 0, paper: 0 };
-      posts.forEach(p => { if (counts[p.category] !== undefined) counts[p.category]++; });
-      Object.keys(counts).forEach(k => {
-        const el = document.getElementById('count-' + k);
-        if (el) el.textContent = counts[k];
-      });
-    }
-
-    function renderTagsCloud() {
-      const tagCount = {};
-      posts.forEach(p => p.tags.forEach(t => tagCount[t] = (tagCount[t] || 0) + 1));
-      const sorted = Object.entries(tagCount).sort((a,b) => b[1]-a[1]).slice(0, 20);
-      const cloud = document.getElementById('tags-cloud');
-      cloud.innerHTML = sorted.map(([t]) => `<span class="tag-chip" onclick="searchTag('${escHtml(t)}')">${escHtml(t)}</span>`).join('');
-    }
-
-    function categoryLabel(cat) {
-      return { rl: '强化学习', theory: '理论笔记', practice: '实战记录', paper: '论文阅读' }[cat] || cat;
-    }
+    function savePosts() { localStorage.setItem('ml_journal_posts', JSON.stringify(posts)); }
 
     function escHtml(s) {
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
+    function categoryLabel(c) { return { rl:'强化学习', theory:'理论笔记', practice:'实战记录', paper:'论文阅读' }[c] || c; }
 
-    // ── Filter ──
+    // ══════════════════════════════════
+    // Render
+    // ══════════════════════════════════
+    function renderPosts() {
+      const list = document.getElementById('post-list');
+      const filtered = currentFilter === 'all' ? posts : posts.filter(p => p.category === currentFilter);
+      if (!filtered.length) {
+        list.innerHTML = `<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-title">还没有日志</div><div class="empty-desc">点击"写新日志"开始记录你的学习旅程</div></div>`;
+        return;
+      }
+      list.innerHTML = filtered.map(p => `
+        <div class="post-card ${p.category}" onclick="openPost(${p.id})">
+          <div class="post-meta"><span class="post-date">${p.date}</span><span class="post-tag ${p.category}">${categoryLabel(p.category)}</span></div>
+          <div class="post-title">${escHtml(p.title)}</div>
+          <div class="post-summary">${escHtml(p.summary)}</div>
+          <div class="post-footer">
+            <div class="post-tags">${p.tags.slice(0,4).map(t=>'<span class="post-chip">'+escHtml(t)+'</span>').join('')}</div>
+            <span class="read-more">阅读全文 →</span>
+          </div>
+        </div>`).join('');
+    }
+
+    function renderStats() {
+      document.getElementById('total-posts').textContent = posts.length;
+      const tags = new Set(posts.flatMap(p => p.tags));
+      document.getElementById('total-tags').textContent = tags.size;
+      const dates = posts.map(p=>p.date).sort().reverse();
+      document.getElementById('last-update').textContent = dates[0] ? dates[0].slice(5) : '—';
+      const c = {all:posts.length, rl:0,theory:0,practice:0,paper:0};
+      posts.forEach(p => { if (c[p.category]!=null) c[p.category]++; });
+      Object.keys(c).forEach(k => { const el=document.getElementById('count-'+k); if(el) el.textContent=c[k]; });
+    }
+
+    function renderTagsCloud() {
+      const tc={}; posts.forEach(p=>p.tags.forEach(t=>tc[t]=(tc[t]||0)+1));
+      const sorted=Object.entries(tc).sort((a,b)=>b[1]-a[1]).slice(0,20);
+      document.getElementById('tags-cloud').innerHTML=sorted.map(([t])=>`<span class="tag-chip">${escHtml(t)}</span>`).join('');
+    }
+
     function filterPosts(cat, el) {
       currentFilter = cat;
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
-      if (el) {
-        el.classList.add('active');
-        const sideEl = document.querySelector(`.sidebar-link[onclick*="'${cat}'"]`);
-        if (sideEl) sideEl.classList.add('active');
-      }
+      document.querySelectorAll('.filter-btn,.sidebar-link').forEach(b=>b.classList.remove('active'));
+      if(el){ el.classList.add('active'); const s=document.querySelector(\`.sidebar-link[onclick*="${cat}"]\`); if(s)s.classList.add('active'); }
       renderPosts();
       return false;
     }
 
-    // ── Post modal ──
+    function renderAll() { renderStats(); renderPosts(); renderTagsCloud(); }
+
+    // ══════════════════════════════════
+    // Markdown Renderer (enhanced)
+    // ══════════════════════════════════
+    function renderMarkdown(md) {
+      let html = md;
+      // Images first — before any escaping
+      html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<br><img src="$2" alt="$1"/><br>');
+      // Code blocks
+      html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) =>
+        `<pre data-lang="${lang||'code'}"><code>${escHtml(code.trim())}</code></pre>`);
+      // Inline code
+      html = html.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+      // Headers
+      html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+      html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+      html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+      // Bold/italic
+      html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+      html = html.replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text)">$1</strong>');
+      html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      // Tables
+      html = html.replace(/^\|(.+)\|\n\|[-:\| ]+\|/gm, function(match, headerRow){
+        const headers = headerRow.split('|').map(h=>h.trim()).filter(Boolean);
+        return '<table><thead><tr>' + headers.map(h=>`<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+      });
+      html = html.replace(/^ \|?((?:\|.+\|)+)$/gm, (match, row) =>
+        '<tr>' + row.split('|').map(c=>`<td>${c.trim()}</td>`).filter((_,i)=>i>0&&i<row.split('|').length-1).join('') + '</tr>');
+      // Close table
+      html = html.replace(/<\/tbody>(?!\s*<\/table>)([\s\S]*?(?=<table|$))/g, '</tbody></table>$1');
+      // Blockquote
+      html = html.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
+      // HR
+      html = html.replace(/^---$/gm, '<hr>');
+      // Lists
+      html = html.replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>');
+      html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+      html = html.replace(/(<li>.*<\/li>\n?)+/g, (m) => m.includes('<ol>') || m.includes('<ul>') ? m : `<ul>${m}</ul>`);
+      html = html.replace(/(<ul>\s*<li>)((?:(?!<\/li>).)*\d+\.)/g, '$1'); // simple cleanup
+      // Links
+      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+      // Paragraph wrapping
+      html = html.split('\n\n').map(block => {
+        const t = block.trim();
+        if (!t) return '';
+        if (/^<(h[1-6]|pre|blockquote|ul|ol|table|hr|img|br)/i.test(t)) return t;
+        return `<p>${t}</p>`;
+      }).join('');
+
+      // Clean up empty paragraphs
+      html = html.replace(/<p>\s*<\/p>/g, '');
+
+      return html;
+    }
+
+    // ══════════════════════════════════
+    // Editor
+    // ══════════════════════════════════
+    function openEditor(postId) {
+      editPostId = postId || null;
+      savedImages = [];
+      const overlay = document.getElementById('editor-overlay');
+
+      // Fill fields
+      if (editPostId !== null) {
+        const post = posts.find(p => p.id === editPostId);
+        document.getElementById('ed-title').value = post.title || '';
+        document.getElementById('ed-category').value = post.category || 'rl';
+        document.getElementById('ed-tags').value = (post.tags || []).join(', ');
+        document.getElementById('ed-source').value = post.content || '';
+      } else {
+        document.getElementById('ed-title').value = '';
+        document.getElementById('ed-category').value = 'rl';
+        document.getElementById('ed-tags').value = '';
+        document.getElementById('ed-source').value = '';
+      }
+
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+
+      // Focus title if empty, else focus source
+      setTimeout(() => {
+        if (!document.getElementById('ed-title').value.trim())
+          document.getElementById('ed-title').focus();
+        else
+          document.getElementById('ed-source').focus();
+        updatePreview(); // trigger preview on open
+      }, 150);
+
+      // Bind input events
+      bindEditorEvents();
+
+      updateStatus('已保存');
+    }
+
+    function closeEditor(didSave) {
+      document.getElementById('editor-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+      exitFullscreenMode();
+      if (!didSave && confirm('确定要放弃当前内容吗？')) { /* ok */ }
+      renderAll();
+    }
+
+    function bindEditorEvents() {
+      const source = document.getElementById('ed-source');
+      const titleInput = document.getElementById('ed-title');
+
+      source.oninput = () => {
+        clearTimeout(previewDebounce);
+        updateStatus('编辑中...');
+        previewDebounce = setTimeout(updatePreview, 120);
+      };
+
+      // Tab key support in textarea
+      source.onkeydown = (e) => {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const start = source.selectionStart;
+          const end = source.selectionEnd;
+          source.value = source.value.substring(0, start) + '  ' + source.value.substring(end);
+          source.selectionStart = source.selectionEnd = start + 2;
+          updatePreview();
+        }
+        // Ctrl/Cmd+S to save
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+          e.preventDefault();
+          savePostFromEditor();
+        }
+        // Escape to close
+        if (e.key === 'Escape') {
+          closeEditor(false);
+        }
+      };
+
+      // Paste image support
+      source.onpaste = handlePaste;
+
+      titleInput.oninput = () => { updateStatus('编辑中...'); };
+    }
+
+    // ══════════════════════════════════
+    // Paste image handler
+    // ══════════════════════════════════
+    async function handlePaste(e) {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (!file) continue;
+
+          // Convert to base64
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const base64 = ev.target.result; // data:image/png;base64,...
+            const idx = savedImages.length;
+            savedImages.push(base64);
+
+            // Insert image markdown at cursor position
+            const ta = document.getElementById('ed-source');
+            const pos = ta.selectionStart;
+            const mdImg = `![图片${idx + 1}](${base64})`;
+            const val = ta.value;
+            ta.value = val.substring(0, pos) + '\n' + mdImg + '\n' + val.substring(pos);
+
+            // Move cursor after insertion
+            const newPos = pos + mdImg.length + 2;
+            ta.selectionStart = ta.selectionEnd = newPos;
+            ta.focus();
+
+            updatePreview();
+            updateStatus(`已粘贴图片 (${savedImages.length})`);
+          };
+          reader.readAsDataURL(file);
+          return;
+        }
+      }
+    }
+
+    // Also support drag-and-drop of images into editor area
+    function setupDragDrop() {
+      const edArea = document.querySelector('.ed-editor-area');
+      edArea.ondragover = (e) => { e.preventDefault(); e.dataTransfer.dropEffect='copy'; };
+      edArea.ondrop = (e) => {
+        e.preventDefault();
+        const files = e.dataTransfer?.files;
+        if (!files) return;
+        Array.from(files).forEach(file => {
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              const base64 = ev.target.result;
+              const idx = savedImages.length;
+              savedImages.push(base64);
+              const ta = document.getElementById('ed-source');
+              const pos = ta.selectionStart;
+              const mdImg = `![拖入图片${idx + 1}](${base64})`;
+              ta.value = ta.value.substring(0,pos) + '\n'+mdImg+'\n'+ta.value.substring(pos);
+              ta.selectionStart = ta.selectionEnd = pos + mdImg.length + 2;
+              ta.focus();
+              updatePreview();
+              updateStatus(`已添加图片 (${savedImages.length})`);
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      };
+    }
+
+    // ══════════════════════════════════
+    // Live preview
+    // ══════════════════════════════════
+    function updatePreview() {
+      const src = document.getElementById('ed-source').value;
+      const pv = document.getElementById('ed-preview');
+      if (!src.trim()) {
+        pv.innerHTML = '<p style="color:var(--text3);padding:80px 0;text-align:center;">开始输入 Markdown 内容，这里会即时显示渲染结果...<br><span style="font-size:12px;">支持代码块 / 表格 / 图片 / 引用 / 列表等语法</span></p>';
+        return;
+      }
+      pv.innerHTML = renderMarkdown(src);
+    }
+
+    // ══════════════════════════════════
+    // Save from editor
+    // ══════════════════════════════════
+    function savePostFromEditor() {
+      const title = document.getElementById('ed-title').value.trim();
+      const cat = document.getElementById('ed-category').value;
+      const rawTags = document.getElementById('ed-tags').value.trim();
+      const content = document.getElementById('ed-source').value.trim();
+
+      if (!title) { alert('请填写标题'); document.getElementById('ed-title').focus(); return; }
+      if (!content) { alert('请填写内容'); document.getElementById('ed-source').focus(); return; }
+
+      const tags = rawTags ? rawTags.split(',').map(t=>t.trim()).filter(Boolean) : ['笔记'];
+      const today = new Date().toISOString().slice(0,10);
+      const summary = content.replace(/```[\s\S]*?```/g,'').replace(/!\[[^\]]*]\([^)]+\)/g,'[图片]').replace(/[#*`>\-\[\]]/g,'').trim().slice(0,140)+'...';
+
+      if (editPostId !== null) {
+        // Update existing
+        const idx = posts.findIndex(p => p.id === editPostId);
+        if (idx !== -1) {
+          posts[idx].title = title;
+          posts[idx].category = cat;
+          posts[idx].tags = tags;
+          posts[idx].content = content;
+          posts[idx].summary = summary;
+        }
+      } else {
+        posts.unshift({ id: Date.now(), title, category: cat, date: today, summary, tags, content });
+      }
+
+      savePosts();
+      updateStatus('已保存 ✓');
+      closeEditor(true);
+      renderAll();
+    }
+
+    function updateStatus(text) {
+      const el = document.getElementById('ed-status');
+      if (el) el.textContent = text;
+    }
+
+    // ══════════════════════════════════
+    // Fullscreen toggle
+    // ══════════════════════════════════
+    function toggleFullscreen() {
+      isFullscreen = !isFullscreen;
+      const body = document.getElementById('editor-body');
+      const btn = document.getElementById('fs-btn');
+      const paneEdit = document.getElementById('ed-pane-edit');
+      const panePrev = document.getElementById('ed-pane-prev');
+      const toolbar = document.querySelector('.editor-toolbar');
+
+      if (isFullscreen) {
+        body.style.position = 'fixed'; body.style.inset = '0';
+        body.style.top = '48px'; body.style.zIndex = '202';
+        toolbar.style.position = 'fixed'; toolbar.style.top = '0'; toolbar.style.left = '0'; toolbar.style.right = '0'; toolbar.style.zIndex = '203';
+        btn.textContent = '⬚ 退出全屏';
+        // Hide sidebar labels in fullscreen
+        paneEdit.querySelector('.ed-label').style.display = 'none';
+        panePrev.querySelector('.ed-label').style.display = 'none';
+      } else {
+        body.style.position = ''; body.style.inset = ''; body.style.top = '';
+        toolbar.style.position = ''; toolbar.style.top = ''; toolbar.style.left = ''; toolbar.style.right = ''; toolbar.style.zIndex = '';
+        btn.textContent = '⛶ 全屏';
+        paneEdit.querySelector('.ed-label').style.display = '';
+        panePrev.querySelector('.ed-label').style.display = '';
+      }
+    }
+
+    function exitFullscreenMode() {
+      isFullscreen = false;
+      const body = document.getElementById('editor-body');
+      const btn = document.getElementById('fs-btn');
+      const toolbar = document.querySelector('.editor-toolbar');
+      body.style.position = ''; body.style.inset = '';
+      toolbar.style.position = ''; toolbar.style.top = ''; toolbar.style.left = '';
+      btn.textContent = '⛶ 全屏';
+      document.getElementById('ed-pane-edit').querySelector('.ed-label').style.display = '';
+      document.getElementById('ed-pane-prev').querySelector('.ed-label').style.display = '';
+    }
+
+    // ══════════════════════════════════
+    // Read post modal
+    // ══════════════════════════════════
     function openPost(id) {
-      const p = posts.find(x => x.id === id);
-      if (!p) return;
-      const content = renderMarkdown(p.content);
-      document.getElementById('modal-inner').innerHTML = `
-        <h2>${escHtml(p.title)}</h2>
-        <div class="modal-meta">
-          <span class="post-date">${p.date}</span>
-          <span class="post-tag ${p.category}">${categoryLabel(p.category)}</span>
-          ${p.tags.map(t => `<span class="post-chip">${escHtml(t)}</span>`).join('')}
-        </div>
-        <div class="modal-content">${content}</div>
-      `;
+      const p = posts.find(x => x.id === id); if(!p) return;
+      document.getElementById('modal-inner').innerHTML =
+        `<h2>${escHtml(p.title)}</h2>` +
+        `<div class="modal-meta">` +
+          `<span class="post-date">${p.date}</span>` +
+          `<span class="post-tag ${p.category}">${categoryLabel(p.category)}</span>` +
+          `${p.tags.map(t=>`<span class="post-chip">${escHtml(t)}</span>`).join('')}` +
+        `</div>` +
+        `<div class="modal-content pv">${renderMarkdown(p.content)}</div>`;
       document.getElementById('modal-overlay').classList.add('open');
       document.body.style.overflow = 'hidden';
     }
-
-    function closeModal(e) {
-      if (e && e.target !== document.getElementById('modal-overlay') && !e.target.classList.contains('modal-close')) return;
+    function closeReadModal(e) {
+      if(e && e.target!==document.getElementById('modal-overlay') && !e.target.classList.contains('modal-close')) return;
       document.getElementById('modal-overlay').classList.remove('open');
       document.body.style.overflow = '';
     }
 
-    // Simple markdown renderer
-    function renderMarkdown(md) {
-      return md
-        .replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => `<pre><code>${escHtml(code.trim())}</code></pre>`)
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        .replace(/^## (.+)$/gm, '<h3>$1</h3>')
-        .replace(/^### (.+)$/gm, '<h3 style="font-size:15px">$1</h3>')
-        .replace(/^\*\*(.+)\*\*$/gm, '<strong>$1</strong>')
-        .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text)">$1</strong>')
-        .replace(/^> (.+)$/gm, '<div class="highlight">$1</div>')
-        .replace(/^- (.+)$/gm, '<li>$1</li>')
-        .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
-        .replace(/\n\n/g, '</p><p>')
-        .replace(/^(?!<[hup]|<li|<pre|<div)(.+)$/gm, (m) => m.trim() ? m : '')
-        .replace(/^(<h[23]>|<pre>|<ul>|<div class="highlight">)/, '$1')
-        .replace(/\n/g, '<br>');
-    }
-
-    // ── New post ──
-    function toggleNewPost(e) {
-      if (e) e.preventDefault();
-      const form = document.getElementById('new-post-form');
-      form.classList.toggle('open');
-      if (form.classList.contains('open')) {
-        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }
-
-    function savePost() {
-      const title = document.getElementById('form-title').value.trim();
-      const category = document.getElementById('form-category').value;
-      const tagsRaw = document.getElementById('form-tags').value;
-      const content = document.getElementById('form-content').value.trim();
-
-      if (!title || !content) { alert('请填写标题和内容'); return; }
-
-      const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
-      const today = new Date().toISOString().slice(0, 10);
-      const summary = content.replace(/```[\s\S]*?```/g, '').replace(/[#*`>\-]/g, '').trim().slice(0, 120) + '...';
-
-      const newPost = {
-        id: Date.now(),
-        title, category, date: today,
-        summary: summary || content.slice(0, 120) + '...',
-        tags: tags.length ? tags : ['笔记'],
-        content
-      };
-
-      posts.unshift(newPost);
-      savePosts();
-      renderAll();
-      document.getElementById('new-post-form').classList.remove('open');
-      document.getElementById('form-title').value = '';
-      document.getElementById('form-tags').value = '';
-      document.getElementById('form-content').value = '';
-    }
-
-    function searchTag(tag) {
-      // Future: filter by tag
-    }
-
-    function renderAll() {
-      renderStats();
-      renderPosts();
-      renderTagsCloud();
-    }
-
-    // ── Init ──
+    // ══════════════════════════════════
+    // Init
+    // ══════════════════════════════════
     loadPosts();
     renderAll();
+    setupDragDrop();
+
+    // Keyboard shortcut: Cmd/Ctrl+N to open editor
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n' && !document.getElementById('editor-overlay').classList.contains('open')) {
+        e.preventDefault();
+        openEditor();
+      }
+    });
   </script>
 </body>
 </html>
