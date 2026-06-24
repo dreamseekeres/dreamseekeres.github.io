@@ -1451,16 +1451,6 @@ print(&quot;hello&quot;)
       }
     }
 
-    // ══════════════════════════════════
-    // Init
-    // ══════════════════════════════════
-    loadPosts();
-    ensurePostCategories();
-    updateDynamicCategoryStyles();
-    renderAll();
-    renderCategorySelect();
-    setupDragDrop();
-
     // Keyboard shortcut: Cmd/Ctrl+N to open editor, Esc to close viewer
     document.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'n' && !document.getElementById('editor-overlay').classList.contains('open')) {
@@ -1651,6 +1641,16 @@ print(&quot;hello&quot;)
       renderAll();
       renderCategorySelect();
     }
+
+    // ══════════════════════════════════
+    // Init (must be after category system constants are defined)
+    // ══════════════════════════════════
+    loadPosts();
+    ensurePostCategories();
+    updateDynamicCategoryStyles();
+    renderAll();
+    renderCategorySelect();
+    setupDragDrop();
 
   </script>
 
