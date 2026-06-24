@@ -49,7 +49,7 @@
     .sidebar { position: sticky; top: 90px; height: fit-content; }
     .sidebar-section { margin-bottom: 28px; }
     .sidebar-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3); font-family: var(--font-mono); margin-bottom: 10px; }
-    .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 7px; cursor: pointer; transition: all 0.18s; font-size: 14px; color: var(--text2); text-decoration: none; margin-bottom: 2px; }
+    .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 7px; cursor: pointer; transition: all 0.18s; font-size: 14px; color: var(--text2); text-decoration: none; margin-bottom: 2px; background: transparent; border: none; width: 100%; text-align: left; font-family: var(--font-sans); }
     .sidebar-link:hover, .sidebar-link.active { background: var(--bg2); color: var(--text); }
     .sidebar-link .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
     .sidebar-link.active .dot { background: var(--accent); }
@@ -65,7 +65,7 @@
     .new-post-btn {
       display: inline-flex; align-items: center; gap: 8px; background: var(--accent);
       color: #0d0f14; border: none; border-radius: 8px; padding: 9px 18px;
-      font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none;
+      font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: var(--font-sans);
     }
     .new-post-btn:hover { transform: translateY(-1px); opacity: 0.9; }
     .blog-desc { color: var(--text2); font-size: 14px; max-width: 520px; }
@@ -76,9 +76,11 @@
 
     /* Filter bar */
     .filter-bar { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-    .filter-btn { font-size: 13px; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; transition: all 0.2s; }
+    .filter-btn { font-size: 13px; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; transition: all 0.2s; font-family: var(--font-sans); }
     .filter-btn:hover { border-color: var(--border-hover); color: var(--text); }
     .filter-btn.active { background: rgba(52,211,153,0.1); border-color: rgba(52,211,153,0.4); color: var(--accent); }
+    .nav-btn { background: transparent; border: none; color: var(--text2); font-size: 14px; cursor: pointer; font-family: var(--font-sans); padding: 6px 4px; transition: color 0.2s; }
+    .nav-btn:hover { color: var(--text); }
 
     /* Post list */
     .post-list { display: flex; flex-direction: column; gap: 14px; }
@@ -287,8 +289,8 @@
         <div><div class="nav-brand-text">ML 学习日志</div><div class="nav-brand-sub">my-MachineLearning-journal</div></div>
       </a>
       <div class="nav-right">
-        <a href="javascript:void(0)" onclick="openEditor();return false">写日志</a>
-        <a href="#" onclick="filterPosts('all', this)">全部</a>
+        <button type="button" class="nav-btn" onclick="openEditor()">写日志</button>
+        <button type="button" class="nav-btn" onclick="filterPosts('all', this)">全部</button>
         <a href="../index.html" class="home-link">← 返回主页</a>
       </div>
     </div>
@@ -299,11 +301,11 @@
     <aside class="sidebar">
       <div class="sidebar-section">
         <div class="sidebar-title">分类</div>
-        <a class="sidebar-link active" onclick="filterPosts('all',this)"><span class="dot"></span>全部日志<span class="count" id="count-all">0</span></a>
-        <a class="sidebar-link" onclick="filterPosts('rl',this)"><span class="dot"></span>强化学习<span class="count" id="count-rl">0</span></a>
-        <a class="sidebar-link" onclick="filterPosts('theory',this)"><span class="dot"></span>理论笔记<span class="count" id="count-theory">0</span></a>
-        <a class="sidebar-link" onclick="filterPosts('practice',this)"><span class="dot"></span>实战记录<span class="count" id="count-practice">0</span></a>
-        <a class="sidebar-link" onclick="filterPosts('paper',this)"><span class="dot"></span>论文阅读<span class="count" id="count-paper">0</span></a>
+        <button type="button" class="sidebar-link active" onclick="filterPosts('all',this)"><span class="dot"></span>全部日志<span class="count" id="count-all">0</span></button>
+        <button type="button" class="sidebar-link" onclick="filterPosts('rl',this)"><span class="dot"></span>强化学习<span class="count" id="count-rl">0</span></button>
+        <button type="button" class="sidebar-link" onclick="filterPosts('theory',this)"><span class="dot"></span>理论笔记<span class="count" id="count-theory">0</span></button>
+        <button type="button" class="sidebar-link" onclick="filterPosts('practice',this)"><span class="dot"></span>实战记录<span class="count" id="count-practice">0</span></button>
+        <button type="button" class="sidebar-link" onclick="filterPosts('paper',this)"><span class="dot"></span>论文阅读<span class="count" id="count-paper">0</span></button>
       </div>
       <div class="sidebar-section">
         <div class="sidebar-title">常用标签</div>
@@ -318,7 +320,7 @@
     <!-- MAIN -->
     <main>
       <div class="blog-header">
-        <div class="blog-header-top"><div class="blog-title">学习日志</div><a href="javascript:void(0)" onclick="openEditor();return false" class="new-post-btn">+ 写新日志</a></div>
+        <div class="blog-header-top"><div class="blog-title">学习日志</div><button type="button" class="new-post-btn" onclick="openEditor()">+ 写新日志</button></div>
         <p class="blog-desc">记录机器学习与强化学习的学习历程、具身智能研究中的技术探索与踩坑笔记。</p>
         <div class="stats-row">
           <div class="stat"><div class="stat-n" id="total-posts">0</div><div class="stat-l">篇日志</div></div>
