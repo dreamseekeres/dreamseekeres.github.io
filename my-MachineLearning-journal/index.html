@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>ML 学习日志 | Yibo Wang</title>
   <meta name="description" content="王艺博的机器学习日志 — 强化学习、具身智能、论文笔记" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -767,12 +770,38 @@ print(&quot;hello&quot;)
         try {
           posts = JSON.parse(saved);
           // Migration: ensure all posts have attachments array
-          posts.forEach(p => { if (!Array.isArray(p.attachments)) p.attachments = []; });
+          if (Array.isArray(posts)) {
+            posts.forEach(p => { if (!Array.isArray(p.attachments)) p.attachments = []; });
+          } else {
+            posts = [...DEFAULT_POSTS];
+          }
         } catch { posts = [...DEFAULT_POSTS]; }
       }
       else { posts = [...DEFAULT_POSTS]; }
     }
-    function savePosts() { localStorage.setItem('ml_journal_posts', JSON.stringify(posts)); }
+    function savePosts() {
+      try {
+        localStorage.setItem('ml_journal_posts', JSON.stringify(posts));
+        return true;
+      } catch (e) {
+        console.error('savePosts failed:', e);
+        // Likely QuotaExceededError — try to strip large base64 data and retry
+        try {
+          const stripped = posts.map(p => ({
+            ...p,
+            content: p.content ? p.content.replace(/data:[^;]+;base64,[A-Za-z0-9+/=]{500,}/g, '[图片已省略]') : p.content,
+            attachments: (p.attachments || []).map(a => ({ ...a, data: a.data && a.data.length > 10000 ? '' : a.data }))
+          }));
+          localStorage.setItem('ml_journal_posts', JSON.stringify(stripped));
+          alert('日志内容较大，已自动压缩内嵌图片以适配存储限制。附件中的大文件可能需要重新上传。');
+          return true;
+        } catch (e2) {
+          alert('保存失败：浏览器本地存储空间不足（localStorage 配额超限）。建议删除旧日志或减少大图片/附件的使用。');
+          console.error('savePosts retry failed:', e2);
+          return false;
+        }
+      }
+    }
 
     function escHtml(s) {
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1304,7 +1333,14 @@ print(&quot;hello&quot;)
         posts.unshift({ id: Date.now(), title, category: cat, date: today, summary, tags, content, attachments: editorAttachments.map(a => ({...a})) });
       }
 
-      savePosts();
+      const ok = savePosts();
+      if (!ok) return;
+      // Verify the save actually landed in localStorage
+      const verify = localStorage.getItem('ml_journal_posts');
+      if (!verify) {
+        alert('保存验证失败：数据未能写入浏览器存储。请检查浏览器是否禁用了 localStorage，或尝试使用非隐私模式访问。');
+        return;
+      }
       updateStatus('已保存 ✓');
       closeEditor(true);
       renderAll();
