@@ -452,6 +452,8 @@
     .modal-action-btn:hover { color: var(--text); border-color: var(--border-hover); }
     .modal-action-btn.accent { color: var(--accent); border-color: rgba(52,211,153,0.3); }
     .modal-action-btn.accent:hover { background: rgba(52,211,153,0.08); }
+    .modal-action-btn.danger { color: var(--red); border-color: rgba(248,113,113,0.3); }
+    .modal-action-btn.danger:hover { background: rgba(248,113,113,0.08); }
 
     /* Fullscreen modal */
     .modal-overlay.fullscreen {
@@ -645,6 +647,7 @@ print(&quot;hello&quot;)
       <div class="modal-actions" id="modal-actions">
         <button class="modal-action-btn accent" onclick="editCurrentPost()">✎ 编辑</button>
         <button class="modal-action-btn" onclick="toggleModalFullscreen()">⛶ 全屏</button>
+        <button class="modal-action-btn danger" onclick="deleteCurrentPost()">🗑 删除</button>
       </div>
       <button class="modal-close" onclick="closeReadModal()">关闭 ✕</button>
       <div id="modal-inner"></div>
@@ -1426,6 +1429,17 @@ print(&quot;hello&quot;)
       const id = readingPostId;
       closeReadModal();
       openEditor(id);
+    }
+
+    function deleteCurrentPost() {
+      if (readingPostId === null) return;
+      const post = posts.find(p => p.id === readingPostId);
+      if (!post) return;
+      if (!confirm(`确定要删除日志「${post.title}」吗？\n\n此操作不可撤销。`)) return;
+      posts = posts.filter(p => p.id !== readingPostId);
+      savePosts();
+      closeReadModal();
+      renderAll();
     }
 
     function toggleModalFullscreen() {
