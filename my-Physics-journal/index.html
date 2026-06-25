@@ -636,7 +636,7 @@ print(&quot;hello&quot;)
       <!-- Right: Live Preview -->
       <div class="ed-pane" id="ed-pane-prev">
         <div class="ed-label">👁 预览 &nbsp;<span style="color:var(--text3);font-weight:400;">实时渲染</span></div>
-        <div class="ed-preview-area pv" id="ed-preview" contenteditable="true">
+        <div class="ed-preview-area pv" id="ed-preview" contenteditable="false">
           <p class="ed-preview-placeholder">开始输入 Markdown 内容，这里会即时显示渲染结果...</p>
         </div>
       </div>
@@ -1113,19 +1113,9 @@ print(&quot;hello&quot;)
       source.onpaste = handlePaste;
       titleInput.oninput = () => { updateStatus('编辑中...'); };
 
-      // Preview contenteditable sync (works in ALL modes)
-      preview.addEventListener('input', () => {
-        previewEditInProgress = true;
-        source.value = preview.innerText || preview.textContent || '';
-        updateStatus('预览编辑中...');
-      });
-      preview.addEventListener('blur', () => {
-        if (previewEditInProgress) {
-          previewEditInProgress = false;
-          updatePreview();
-          updateStatus('已同步');
-        }
-      });
+      // Preview area is read-only — editing happens in the textarea, preview auto-updates.
+      // (Previous contenteditable sync was removed because innerText → textarea
+      //  destroys all Markdown syntax, making the content uneditable.)
 
       // Draggable divider
       const divider = document.getElementById('ed-divider');
@@ -1162,8 +1152,7 @@ print(&quot;hello&quot;)
       ['split','edit','preview'].forEach(m => document.getElementById('view-'+m).classList.toggle('active', m===mode));
       if (mode === 'edit') setTimeout(() => document.getElementById('ed-source').focus(), 50);
       if (mode === 'preview') {
-        if (!previewEditInProgress) updatePreview();
-        setTimeout(() => document.getElementById('ed-preview').focus(), 50);
+        updatePreview();
       }
     }
 
@@ -1389,7 +1378,6 @@ print(&quot;hello&quot;)
     function updatePreview() {
       const src = document.getElementById('ed-source').value;
       const pv = document.getElementById('ed-preview');
-      if (previewEditInProgress) return;
       if (!src.trim()) {
         pv.innerHTML = '<p class="ed-preview-placeholder">开始输入 Markdown 内容，这里会即时显示渲染结果...<br><span style="font-size:12px;">支持代码块 / 表格 / 图片 / 引用 / 列表 / 附件等语法</span></p>';
         return;
