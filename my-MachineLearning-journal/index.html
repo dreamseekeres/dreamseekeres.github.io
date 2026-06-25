@@ -11,6 +11,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
   <style>
     :root {
       --bg: #0d0f14; --bg2: #13161e; --bg3: #1a1e28;
@@ -865,55 +867,152 @@ print(&quot;hello&quot;)
     // Markdown Renderer (enhanced)
     // ══════════════════════════════════
     function renderMarkdown(md) {
+      if (!md) return '';
       let html = md;
-      // Images first — before any escaping
+
+      // ── Step 1: Extract math expressions (protect from markdown processing) ──
+      const mathStore = [];
+      // Block math: $$...$$  or  \[...\]
+      html = html.replace(/\$\$([\s\S]+?)\$\$/g, (_, expr) => {
+        const rendered = renderKatex(expr, true);
+        const idx = mathStore.length;
+        mathStore.push(rendered);
+        return `\x00MATHBLOCK${idx}\x00`;
+      });
+      html = html.replace(/\\\[([\s\S]+?)\\\]/g, (_, expr) => {
+        const rendered = renderKatex(expr, true);
+        const idx = mathStore.length;
+        mathStore.push(rendered);
+        return `\x00MATHBLOCK${idx}\x00`;
+      });
+      // Inline math: $...$  or  \(...\)  (not greedy, no $ inside)
+      html = html.replace(/\$([^\$\n]+?)\$/g, (_, expr) => {
+        const rendered = renderKatex(expr, false);
+        const idx = mathStore.length;
+        mathStore.push(rendered);
+        return `\x00MATHINLINE${idx}\x00`;
+      });
+      html = html.replace(/\\\(([^)\n]+?)\\\)/g, (_, expr) => {
+        const rendered = renderKatex(expr, false);
+        const idx = mathStore.length;
+        mathStore.push(rendered);
+        return `\x00MATHINLINE${idx}\x00`;
+      });
+
+      // ── Step 2: Images ──
       html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<br><img src="$2" alt="$1"/><br>');
-      // Code blocks
+
+      // ── Step 3: Code blocks ──
       html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) =>
         `<pre data-lang="${lang||'code'}"><code>${escHtml(code.trim())}</code></pre>`);
-      // Inline code
+
+      // ── Step 4: Inline code ──
       html = html.replace(/`([^`\n]+)`/g, '<code>$1</code>');
-      // Headers
+
+      // ── Step 5: Tables (line-by-line parsing) ──
+      html = renderTables(html);
+
+      // ── Step 6: Headers ──
+      html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
       html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
       html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
       html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
-      // Bold/italic
+
+      // ── Step 7: Bold/italic ──
       html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
       html = html.replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text)">$1</strong>');
-      html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-      // Tables
-      html = html.replace(/^\|(.+)\|\n\|[-:\| ]+\|/gm, function(match, headerRow){
-        const headers = headerRow.split('|').map(h=>h.trim()).filter(Boolean);
-        return '<table><thead><tr>' + headers.map(h=>`<th>${h}</th>`).join('') + '</tr></thead><tbody>';
-      });
-      html = html.replace(/^ \|?((?:\|.+\|)+)$/gm, (match, row) =>
-        '<tr>' + row.split('|').map(c=>`<td>${c.trim()}</td>`).filter((_,i)=>i>0&&i<row.split('|').length-1).join('') + '</tr>');
-      // Close table
-      html = html.replace(/<\/tbody>(?!\s*<\/table>)([\s\S]*?(?=<table|$))/g, '</tbody></table>$1');
-      // Blockquote
+      html = html.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+
+      // ── Step 8: Blockquote ──
       html = html.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
-      // HR
+
+      // ── Step 9: HR ──
       html = html.replace(/^---$/gm, '<hr>');
-      // Lists
-      html = html.replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>');
-      html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+
+      // ── Step 10: Lists ──
+      html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+      html = html.replace(/^[-*] (.+)$/gm, '<li>$1</li>');
       html = html.replace(/(<li>.*<\/li>\n?)+/g, (m) => m.includes('<ol>') || m.includes('<ul>') ? m : `<ul>${m}</ul>`);
-      html = html.replace(/(<ul>\s*<li>)((?:(?!<\/li>).)*\d+\.)/g, '$1'); // simple cleanup
-      // Links
+
+      // ── Step 11: Links ──
       html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
 
-      // Paragraph wrapping
+      // ── Step 12: Paragraph wrapping ──
       html = html.split('\n\n').map(block => {
         const t = block.trim();
         if (!t) return '';
         if (/^<(h[1-6]|pre|blockquote|ul|ol|table|hr|img|br)/i.test(t)) return t;
+        if (/^\x00MATHBLOCK/.test(t)) return t;
         return `<p>${t}</p>`;
-      }).join('');
+      }).join('\n');
 
       // Clean up empty paragraphs
       html = html.replace(/<p>\s*<\/p>/g, '');
 
+      // ── Step 13: Restore math ──
+      html = html.replace(/\x00MATHBLOCK(\d+)\x00/g, (_, i) => mathStore[parseInt(i)] || '');
+      html = html.replace(/\x00MATHINLINE(\d+)\x00/g, (_, i) => mathStore[parseInt(i)] || '');
+
       return html;
+    }
+
+    function renderKatex(expr, displayMode) {
+      try {
+        if (typeof katex !== 'undefined') {
+          return katex.renderToString(expr, { displayMode: displayMode, throwOnError: false, errorColor: '#f87171' });
+        }
+      } catch (e) { /* fall through */ }
+      // Fallback if KaTeX not loaded yet
+      const tag = displayMode ? 'div' : 'span';
+      return `<${tag} class="katex-fallback" style="font-family:var(--font-mono);${displayMode?'text-align:center;padding:8px 0;':''}">${escHtml(expr)}</${tag}>`;
+    }
+
+    function renderTables(html) {
+      const lines = html.split('\n');
+      const result = [];
+      let i = 0;
+      while (i < lines.length) {
+        const line = lines[i];
+        // Detect table start: line starts with | and next line is separator
+        if (line.trim().startsWith('|') && i + 1 < lines.length && /^\|[\s:|-]+\|$/.test(lines[i + 1].trim())) {
+          // Parse header
+          const headers = line.trim().split('|').slice(1, -1).map(h => h.trim());
+          // Parse alignment from separator
+          const seps = lines[i + 1].trim().split('|').slice(1, -1).map(s => s.trim());
+          const aligns = seps.map(s => {
+            if (s.startsWith(':') && s.endsWith(':')) return 'center';
+            if (s.endsWith(':')) return 'right';
+            return 'left';
+          });
+          i += 2;
+          // Parse body rows
+          const rows = [];
+          while (i < lines.length && lines[i].trim().startsWith('|')) {
+            const cells = lines[i].trim().split('|').slice(1, -1).map(c => c.trim());
+            rows.push(cells);
+            i++;
+          }
+          // Build table HTML
+          let tableHtml = '<table><thead><tr>';
+          headers.forEach((h, ci) => {
+            tableHtml += `<th style="text-align:${aligns[ci] || 'left'}">${h}</th>`;
+          });
+          tableHtml += '</tr></thead><tbody>';
+          rows.forEach(row => {
+            tableHtml += '<tr>';
+            headers.forEach((_, ci) => {
+              tableHtml += `<td style="text-align:${aligns[ci] || 'left'}">${row[ci] || ''}</td>`;
+            });
+            tableHtml += '</tr>';
+          });
+          tableHtml += '</tbody></table>';
+          result.push(tableHtml);
+        } else {
+          result.push(line);
+          i++;
+        }
+      }
+      return result.join('\n');
     }
 
     // ══════════════════════════════════
@@ -1020,10 +1119,10 @@ print(&quot;hello&quot;)
       source.onpaste = handlePaste;
       titleInput.oninput = () => { updateStatus('编辑中...'); };
 
-      // Preview contenteditable sync (only active in preview-only mode)
+      // Preview contenteditable sync (works in ALL modes)
       preview.addEventListener('input', () => {
-        if (currentViewMode !== 'preview') return;
         previewEditInProgress = true;
+        // Convert preview's text content back to source textarea
         source.value = preview.innerText || preview.textContent || '';
         updateStatus('预览编辑中...');
       });
