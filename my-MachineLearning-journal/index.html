@@ -975,8 +975,8 @@ print(&quot;hello&quot;)
         const line = lines[i];
         // Detect table start: line starts with | and next line is separator
         if (line.trim().startsWith('|') && i + 1 < lines.length && /^\|[\s:|-]+\|$/.test(lines[i + 1].trim())) {
-          // Parse header
-          const headers = line.trim().split('|').slice(1, -1).map(h => h.trim());
+          // Parse header — protect escaped pipes (\|) before splitting
+          const headers = line.trim().replace(/\\\|/g, '\x01PIPE\x01').split('|').slice(1, -1).map(h => h.replace(/\x01PIPE\x01/g, '|').trim());
           // Parse alignment from separator
           const seps = lines[i + 1].trim().split('|').slice(1, -1).map(s => s.trim());
           const aligns = seps.map(s => {
@@ -985,10 +985,10 @@ print(&quot;hello&quot;)
             return 'left';
           });
           i += 2;
-          // Parse body rows
+          // Parse body rows — protect escaped pipes
           const rows = [];
           while (i < lines.length && lines[i].trim().startsWith('|')) {
-            const cells = lines[i].trim().split('|').slice(1, -1).map(c => c.trim());
+            const cells = lines[i].trim().replace(/\\\|/g, '\x01PIPE\x01').split('|').slice(1, -1).map(c => c.replace(/\x01PIPE\x01/g, '|').trim());
             rows.push(cells);
             i++;
           }
