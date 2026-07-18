@@ -19,8 +19,8 @@
       --border: rgba(255,255,255,0.07); --border-hover: rgba(255,255,255,0.15);
       --text: #e8eaf0; --text2: #9098ad; --text3: #5a6278;
       --accent: #34d399; --accent2: #4f8ef7; --accent3: #7b5cf0; --accent4: #f59e0b;
-      --font-sans: 'Inter', 'Noto Sans SC', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --font-sans: 'SimSun', 'Songti SC', 'STSong', 'Noto Serif SC', serif;
+      --font-mono: 'SimSun', 'Songti SC', 'STSong', 'Noto Serif SC', serif;
     }
 
     html.light-mode {
@@ -1772,6 +1772,24 @@ print(&quot;hello&quot;)
       renderCategoryManagerList();
       renderAll();
       renderCategorySelect();
+    }
+
+    // ══════════════════════════════════
+    // Ensure every post's category exists (auto-register missing ones)
+    // ══════════════════════════════════
+    function ensurePostCategories() {
+      const cats = getCategories();
+      const ids = new Set(cats.map(c => c.id));
+      const palette = ['#4f8ef7', '#7b5cf0', '#34d399', '#f59e0b', '#f87171', '#22d3ee', '#ec4899'];
+      let added = false;
+      posts.forEach(p => {
+        if (p.category && !ids.has(p.category)) {
+          cats.push({ id: p.category, label: p.category, color: palette[cats.length % palette.length] });
+          ids.add(p.category);
+          added = true;
+        }
+      });
+      if (added) saveCategories(cats);
     }
 
     // ══════════════════════════════════
