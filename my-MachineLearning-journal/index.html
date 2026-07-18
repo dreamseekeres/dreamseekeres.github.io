@@ -252,6 +252,18 @@
       transition: all 0.18s; line-height: 1;
     }
     .et-fs-toggle:hover { color: var(--text); border-color: var(--border-hover); }
+
+    /* Markdown toolbar (editor) */
+    .md-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; padding: 6px 12px; border-bottom: 1px solid var(--border); background: var(--bg2); flex-shrink: 0; }
+    .md-toolbar .md-group { display: flex; gap: 4px; align-items: center; }
+    .md-toolbar .md-sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+    .md-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); border-radius: 6px; padding: 5px 9px; font-size: 12px; cursor: pointer; transition: all .18s; font-family: var(--font-sans); display: inline-flex; align-items: center; gap: 4px; line-height: 1; }
+    .md-btn:hover { color: var(--text); border-color: var(--accent); }
+    .md-btn svg { width: 14px; height: 14px; }
+    .md-wordcount { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--text3); white-space: nowrap; padding-left: 8px; }
+    .post-updated { font-family: var(--font-mono); font-size: 11px; color: var(--text3); margin-left: 6px; }
+    .modal-meta .post-updated { margin-left: 0; }
+
     .et-theme-toggle, .et-attach-btn {
       background: transparent; border: 1px solid var(--border); color: var(--text3);
       padding: 6px 10px; border-radius: 7px; cursor: pointer; font-size: 13px;
@@ -650,6 +662,33 @@
       <!-- Left: Editor -->
       <div class="ed-pane" id="ed-pane-edit">
         <div class="ed-label">✎ 编辑区 &nbsp;<span style="color:var(--text3);font-weight:400;">— 支持 Ctrl+V 粘贴图片 / 上方 📎 上传附件</span></div>
+        <div class="md-toolbar" id="md-toolbar">
+          <div class="md-group">
+            <button type="button" class="md-btn" title="加粗" onclick="mdWrap('**','**','加粗文字')"><b>B</b></button>
+            <button type="button" class="md-btn" title="斜体" onclick="mdWrap('*','*','斜体文字')"><i>I</i></button>
+            <button type="button" class="md-btn" title="删除线" onclick="mdWrap('~~','~~','删除文字')"><s>S</s></button>
+          </div>
+          <span class="md-sep"></span>
+          <div class="md-group">
+            <button type="button" class="md-btn" title="标题" onclick="mdLine('# ','标题')">H</button>
+            <button type="button" class="md-btn" title="行内代码" onclick="mdWrap('`','`','code')">&lt;/&gt;</button>
+            <button type="button" class="md-btn" title="代码块" onclick="mdCodeBlock()">{ }</button>
+          </div>
+          <span class="md-sep"></span>
+          <div class="md-group">
+            <button type="button" class="md-btn" title="无序列表" onclick="mdLine('- ','列表项')">• 列表</button>
+            <button type="button" class="md-btn" title="有序列表" onclick="mdLine('1. ','列表项')">1. 列表</button>
+            <button type="button" class="md-btn" title="引用" onclick="mdLine('&gt; ','引用内容')">❝ 引用</button>
+          </div>
+          <span class="md-sep"></span>
+          <div class="md-group">
+            <button type="button" class="md-btn" title="链接" onclick="mdLink()">🔗 链接</button>
+            <button type="button" class="md-btn" title="图片" onclick="mdImage()">🖼 图片</button>
+            <button type="button" class="md-btn" title="表格" onclick="mdTable()">▦ 表格</button>
+            <button type="button" class="md-btn" title="分割线" onclick="mdLine('','\n---\n')">― 分割</button>
+          </div>
+          <span class="md-wordcount" id="md-wordcount">0 字</span>
+        </div>
         <div class="ed-editor-area">
           <textarea class="ed-textarea" id="ed-source"
             placeholder="# 今天学了什么？
@@ -879,7 +918,7 @@ print(&quot;hello&quot;)
         const mins = Math.max(1, Math.round(words / 350));
         return `
         <div class="post-card ${p.category}" onclick="openPost(${p.id})">
-          <div class="post-meta"><span class="post-date">${p.date}</span><span class="post-tag ${p.category}">${categoryLabel(p.category)}</span><span class="read-time">${mins} 分钟读</span></div>
+          <div class="post-meta"><span class="post-date">${p.date}</span>${ (p.updated && p.updated!==p.date) ? `<span class="post-updated">· 编辑于 ${p.updated}</span>` : '' }<span class="post-tag ${p.category}">${categoryLabel(p.category)}</span><span class="read-time">${mins} 分钟读</span></div>
           <div class="post-title">${escHtml(p.title)}</div>
           <div class="post-summary">${escHtml(p.summary)}</div>
           <div class="post-footer">
@@ -1124,10 +1163,16 @@ print(&quot;hello&quot;)
         document.getElementById('ed-source').value = post.content || '';
         editorAttachments = (post.attachments || []).map(a => ({...a}));
       } else {
-        document.getElementById('ed-title').value = '';
-        document.getElementById('ed-category').value = getCategories()[0].id;
-        document.getElementById('ed-tags').value = '';
-        document.getElementById('ed-source').value = '';
+        const draft = loadDraft();
+        if (draft && (draft.content || draft.title)) {
+          applyDraft(draft);
+          updateStatus('已恢复未保存草稿');
+        } else {
+          document.getElementById('ed-title').value = '';
+          document.getElementById('ed-category').value = getCategories()[0].id;
+          document.getElementById('ed-tags').value = '';
+          document.getElementById('ed-source').value = '';
+        }
       }
       renderAttachmentList();
 
@@ -1145,12 +1190,14 @@ print(&quot;hello&quot;)
 
       // Bind input events
       bindEditorEvents();
+      updateWordCount();
 
       updateStatus('已保存');
     }
 
     function closeEditor(didSave) {
       if (!didSave && !confirm('确定要放弃当前内容吗？')) return;
+      if (!didSave) clearDraft();
       document.getElementById('editor-overlay').classList.remove('open');
       document.body.style.overflow = '';
       exitFullscreenMode();
@@ -1170,6 +1217,8 @@ print(&quot;hello&quot;)
         clearTimeout(previewDebounce);
         updateStatus('编辑中...');
         previewDebounce = setTimeout(updatePreview, 120);
+        updateWordCount();
+        saveDraft();
       };
 
       // Tab key support in textarea
@@ -1195,7 +1244,7 @@ print(&quot;hello&quot;)
 
       // Paste image support
       source.onpaste = handlePaste;
-      titleInput.oninput = () => { updateStatus('编辑中...'); };
+      titleInput.oninput = () => { updateStatus('编辑中...'); saveDraft(); updateWordCount(); };
 
       // Preview area is read-only — editing happens in the textarea, preview auto-updates.
       // (Previous contenteditable sync was removed because innerText → textarea
@@ -1494,10 +1543,11 @@ print(&quot;hello&quot;)
           posts[idx].tags = tags;
           posts[idx].content = content;
           posts[idx].summary = summary;
+          posts[idx].updated = today;
           posts[idx].attachments = editorAttachments.map(a => ({...a}));
         }
       } else {
-        posts.unshift({ id: Date.now(), title, category: cat, date: today, summary, tags, content, attachments: editorAttachments.map(a => ({...a})) });
+        posts.unshift({ id: Date.now(), title, category: cat, date: today, updated: today, summary, tags, content, attachments: editorAttachments.map(a => ({...a})) });
       }
 
       const ok = savePosts();
@@ -1509,6 +1559,7 @@ print(&quot;hello&quot;)
         return;
       }
       updateStatus('已保存 ✓');
+      clearDraft();
       closeEditor(true);
       renderAll();
     }
@@ -1516,6 +1567,123 @@ print(&quot;hello&quot;)
     function updateStatus(text) {
       const el = document.getElementById('ed-status');
       if (el) el.textContent = text;
+    }
+
+    // ══════════════════════════════════
+    // Markdown toolbar helpers
+    // ══════════════════════════════════
+    function afterMdEdit() {
+      clearTimeout(previewDebounce);
+      previewDebounce = setTimeout(updatePreview, 120);
+      updateWordCount();
+      updateStatus('编辑中...');
+      saveDraft();
+    }
+    function mdInsert(text, selStart, selEnd) {
+      const ta = document.getElementById('ed-source');
+      const start = ta.selectionStart, end = ta.selectionEnd;
+      ta.value = ta.value.substring(0, start) + text + ta.value.substring(end);
+      const s = start + (selStart != null ? selStart : text.length);
+      const e = start + (selEnd != null ? selEnd : text.length);
+      ta.selectionStart = s; ta.selectionEnd = e;
+      ta.focus();
+      afterMdEdit();
+    }
+    function mdWrap(before, after, placeholder) {
+      const ta = document.getElementById('ed-source');
+      const start = ta.selectionStart, end = ta.selectionEnd;
+      const sel = ta.value.substring(start, end) || placeholder;
+      mdInsert(before + sel + after, before.length, before.length + sel.length);
+    }
+    function mdLine(prefix, placeholder) {
+      const ta = document.getElementById('ed-source');
+      const start = ta.selectionStart;
+      const val = ta.value;
+      const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+      const text = prefix + (placeholder || '');
+      ta.value = val.substring(0, lineStart) + text + val.substring(lineStart);
+      const ps = lineStart + prefix.length;
+      ta.selectionStart = ps; ta.selectionEnd = ps + (placeholder ? placeholder.length : 0);
+      ta.focus();
+      afterMdEdit();
+    }
+    function mdCodeBlock() {
+      const ta = document.getElementById('ed-source');
+      const start = ta.selectionStart, end = ta.selectionEnd;
+      const sel = ta.value.substring(start, end) || '代码';
+      mdInsert('\n```python\n' + sel + '\n```\n', 10, 10 + sel.length);
+    }
+    function mdLink() {
+      const ta = document.getElementById('ed-source');
+      const start = ta.selectionStart, end = ta.selectionEnd;
+      const sel = ta.value.substring(start, end) || '链接文字';
+      mdInsert('[' + sel + '](https://)', 1, 1 + sel.length);
+    }
+    function mdImage() {
+      let inp = document.getElementById('md-img-input');
+      if (!inp) {
+        inp = document.createElement('input');
+        inp.type = 'file'; inp.id = 'md-img-input'; inp.accept = 'image/*'; inp.style.display = 'none';
+        inp.onchange = mdImageSelected;
+        document.body.appendChild(inp);
+      }
+      inp.click();
+    }
+    function mdImageSelected(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => { const t = '\n![图片](' + ev.target.result + ')\n'; mdInsert(t, t.length, t.length); };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    }
+    function mdTable() {
+      const t = '\n| 列1 | 列2 | 列3 |\n|-----|-----|-----|\n| 内容 | 内容 | 内容 |\n| 内容 | 内容 | 内容 |\n';
+      mdInsert(t, t.length, t.length);
+    }
+    function updateWordCount() {
+      const ta = document.getElementById('ed-source');
+      if (!ta) return;
+      const txt = ta.value;
+      const chars = txt.replace(/\s/g, '').length;
+      const words = txt.trim() ? txt.trim().split(/\s+/).length : 0;
+      const el = document.getElementById('md-wordcount');
+      if (el) el.textContent = chars + ' 字 / ' + words + ' 词';
+    }
+
+    // ══════════════════════════════════
+    // Draft auto-save (new posts only)
+    // ══════════════════════════════════
+    const DRAFT_KEY = 'ml_journal_draft';
+    function saveDraft() {
+      if (editPostId !== null) return;
+      try {
+        const draft = {
+          title: document.getElementById('ed-title').value,
+          category: document.getElementById('ed-category').value,
+          tags: document.getElementById('ed-tags').value,
+          content: document.getElementById('ed-source').value,
+          attachments: editorAttachments.map(a => ({...a})),
+          ts: Date.now()
+        };
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      } catch (e) { /* quota exceeded — ignore */ }
+    }
+    function loadDraft() {
+      try { const raw = localStorage.getItem(DRAFT_KEY); return raw ? JSON.parse(raw) : null; }
+      catch (e) { return null; }
+    }
+    function clearDraft() {
+      try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+    }
+    function applyDraft(d) {
+      if (!d) return;
+      document.getElementById('ed-title').value = d.title || '';
+      document.getElementById('ed-category').value = d.category || getCategories()[0].id;
+      document.getElementById('ed-tags').value = d.tags || '';
+      document.getElementById('ed-source').value = d.content || '';
+      editorAttachments = Array.isArray(d.attachments) ? d.attachments.map(a => ({...a})) : [];
+      renderAttachmentList();
     }
 
     // ══════════════════════════════════
@@ -1570,6 +1738,7 @@ print(&quot;hello&quot;)
         `<h2>${escHtml(p.title)}</h2>` +
         `<div class="modal-meta">` +
           `<span class="post-date">${p.date}</span>` +
+          `${(p.updated && p.updated!==p.date) ? `<span class="post-updated">编辑于 ${p.updated}</span>` : ''}` +
           `<span class="post-tag ${p.category}">${categoryLabel(p.category)}</span>` +
           `${p.tags.map(t=>`<span class="post-chip">${escHtml(t)}</span>`).join('')}` +
         `</div>` +
