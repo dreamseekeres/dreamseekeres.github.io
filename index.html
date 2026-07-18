@@ -87,6 +87,12 @@
       overflow-x: hidden;
     }
 
+    /* Smooth theme transition */
+    body, nav, .research-card, .skill-group, .pub-item, .project-card,
+    .contact-box, .timeline, .info-item, footer, .tag, .hero-tag, .nav-links a {
+      transition: background-color .35s ease, color .35s ease, border-color .35s ease;
+    }
+
     /* ---- Noise texture overlay ---- */
     body::before {
       content: '';
@@ -381,6 +387,22 @@
     .stagger.visible > *:nth-child(4) { transition-delay: 0.29s; }
     @media (prefers-reduced-motion: reduce) {
       .fade-up, .stagger > *, .skill-fill, h1 .name-gradient { transition: none !important; animation: none !important; opacity: 1 !important; transform: none !important; }
+    }
+
+    /* ---- Print styles (resume / portfolio → PDF) ---- */
+    @media print {
+      #scroll-progress, #back-to-top, nav, .hero-cta, .glow-blob, body::before { display: none !important; }
+      html, body { background: #fff !important; color: #111 !important; }
+      .container { max-width: 100%; }
+      section { padding: 18px 0 !important; page-break-inside: avoid; }
+      h1 .name-gradient { -webkit-text-fill-color: #111 !important; color: #111 !important; }
+      .stat-num { -webkit-text-fill-color: #111 !important; color: #111 !important; }
+      .research-card, .skill-group, .pub-item, .project-card, .contact-box, .info-item {
+        border: 1px solid #ccc !important; box-shadow: none !important; break-inside: avoid; background: #fff !important;
+      }
+      .section-label, .section-title, .card-title, .tl-title, .pub-title, .contact-box h2 { color: #111 !important; }
+      .fade-up, .stagger > * { opacity: 1 !important; transform: none !important; }
+      a { color: #111 !important; text-decoration: none; }
     }
 
     /* ---- Back to top ---- */
