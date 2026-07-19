@@ -14,6 +14,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous" />
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/turndown@7.2.0/dist/turndown.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/turndown-plugin-gfm@1.0.2/dist/turndown-plugin-gfm.min.js"></script>
   <style>
     :root {
       --bg: #0d0f14; --bg2: #13161e; --bg3: #1a1e28;
@@ -373,6 +375,9 @@
     .ed-preview-area::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
     .ed-preview-area:focus { outline: none; }
     .ed-preview-placeholder { color: var(--text3); padding: 80px 0; text-align: center; font-size: 14px; }
+    .ed-preview-area[contenteditable="true"] { cursor: text; }
+    .ed-preview-area[contenteditable="true"]:focus { outline: none; }
+    .ed-preview-area pre, .ed-preview-area .math-wrapper, .ed-preview-area .attachment-box { cursor: default; }
 
     /* Preview rendered styles */
     .pv h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.5px; margin: 0 0 16px; color: var(--text); }
@@ -740,7 +745,7 @@ print(&quot;hello&quot;)
       <!-- Right: Live Preview -->
       <div class="ed-pane" id="ed-pane-prev">
         <div class="ed-label">👁 预览 &nbsp;<span style="color:var(--text3);font-weight:400;">实时渲染</span></div>
-        <div class="ed-preview-area pv" id="ed-preview" contenteditable="false">
+        <div class="ed-preview-area pv" id="ed-preview" contenteditable="true">
           <p class="ed-preview-placeholder">开始输入 Markdown 内容，这里会即时显示渲染结果...</p>
         </div>
       </div>
@@ -867,6 +872,7 @@ print(&quot;hello&quot;)
     let editPostId = null; // null = new post, number = editing existing post
     let currentViewMode = 'split';
     let previewEditInProgress = false;
+    let previewDirty = false;
     let isFullscreen = false;
     let modalFullscreen = false;
     let readingPostId = null; // currently open post in read modal
@@ -874,6 +880,7 @@ print(&quot;hello&quot;)
     let editorAttachments = []; // attachments for current editing session
     let editorTheme = 'dark'; // 'dark' | 'light'
     let previewDebounce;
+    let previewEditDebounce;
 
     function loadPosts() {
       const saved = localStorage.getItem('ml_journal_posts');
@@ -1118,14 +1125,15 @@ print(&quot;hello&quot;)
     }
 
     function renderKatex(expr, displayMode) {
+      const tag = displayMode ? 'div' : 'span';
       try {
         if (typeof katex !== 'undefined') {
-          return katex.renderToString(expr, { displayMode: displayMode, throwOnError: false, errorColor: '#f87171' });
+          const rendered = katex.renderToString(expr, { displayMode: displayMode, throwOnError: false, errorColor: '#f87171' });
+          return `<${tag} class="math-wrapper" data-math="${escHtml(expr)}">${rendered}</${tag}>`;
         }
       } catch (e) { /* fall through */ }
       // Fallback if KaTeX not loaded yet
-      const tag = displayMode ? 'div' : 'span';
-      return `<${tag} class="katex-fallback" style="font-family:var(--font-mono);${displayMode?'text-align:center;padding:8px 0;':''}">${escHtml(expr)}</${tag}>`;
+      return `<${tag} class="math-wrapper katex-fallback" data-math="${escHtml(expr)}" style="font-family:var(--font-mono);${displayMode?'text-align:center;padding:8px 0;':''}">${escHtml(expr)}</${tag}>`;
     }
 
     function renderTables(html) {
@@ -1258,6 +1266,9 @@ print(&quot;hello&quot;)
       const preview = document.getElementById('ed-preview');
 
       source.oninput = () => {
+        if (previewEditInProgress) return;
+        clearTimeout(previewEditDebounce);
+        previewDirty = false;
         clearTimeout(previewDebounce);
         updateStatus('编辑中...');
         previewDebounce = setTimeout(updatePreview, 120);
@@ -1290,9 +1301,20 @@ print(&quot;hello&quot;)
       source.onpaste = handlePaste;
       titleInput.oninput = () => { updateStatus('编辑中...'); saveDraft(); updateWordCount(); };
 
-      // Preview area is read-only — editing happens in the textarea, preview auto-updates.
-      // (Previous contenteditable sync was removed because innerText → textarea
-      //  destroys all Markdown syntax, making the content uneditable.)
+      // Preview area is editable WYSIWYG; HTML changes sync back to Markdown via Turndown.
+      preview.oninput = () => {
+        previewDirty = true;
+        clearTimeout(previewEditDebounce);
+        previewEditDebounce = setTimeout(() => {
+          syncPreviewToSource();
+          updateStatus('已同步');
+        }, 150);
+      };
+      // Prevent links from navigating when editing preview
+      preview.onclick = (e) => {
+        if (e.target.closest('a')) e.preventDefault();
+      };
+
 
       // Draggable divider
       const divider = document.getElementById('ed-divider');
@@ -1557,9 +1579,71 @@ print(&quot;hello&quot;)
       const pv = document.getElementById('ed-preview');
       if (!src.trim()) {
         pv.innerHTML = '<p class="ed-preview-placeholder">开始输入 Markdown 内容，这里会即时显示渲染结果...<br><span style="font-size:12px;">支持代码块 / 表格 / 图片 / 引用 / 列表 / 附件等语法</span></p>';
-        return;
+      } else {
+        pv.innerHTML = renderMarkdown(src);
       }
-      pv.innerHTML = renderMarkdown(src);
+      protectPreviewElements();
+    }
+
+    function protectPreviewElements() {
+      const pv = document.getElementById('ed-preview');
+      if (!pv) return;
+      pv.setAttribute('contenteditable', 'true');
+      pv.querySelectorAll('pre, .math-wrapper, .attachment-box, .ed-preview-placeholder').forEach(el => {
+        el.setAttribute('contenteditable', 'false');
+      });
+    }
+
+    function htmlToMarkdown(html) {
+      if (typeof TurndownService === 'undefined') return '';
+      const td = new TurndownService({
+        headingStyle: 'atx', hr: '---', bulletListMarker: '-',
+        codeBlockStyle: 'fenced', fence: '```',
+        emDelimiter: '*', strongDelimiter: '**'
+      });
+      if (typeof turndownPluginGfm !== 'undefined') td.use(turndownPluginGfm.gfm);
+
+      // Placeholder / attachments should not become markdown
+      td.addRule('placeholder', {
+        filter: (node) => node.classList && node.classList.contains('ed-preview-placeholder'),
+        replacement: () => ''
+      });
+      td.addRule('attachment', {
+        filter: (node) => node.classList && node.classList.contains('attachment-box'),
+        replacement: () => ''
+      });
+      // Math: restore original syntax from data-math
+      td.addRule('math', {
+        filter: (node) => node.classList && node.classList.contains('math-wrapper'),
+        replacement: (content, node) => {
+          const expr = node.getAttribute('data-math') || '';
+          return node.nodeName === 'DIV' ? `\n$$${expr}$$\n` : `$${expr}$`;
+        }
+      });
+      // Code blocks: extract raw text from highlighted code
+      td.addRule('fencedCode', {
+        filter: (node) => node.nodeName === 'PRE' && node.querySelector('code'),
+        replacement: (content, node) => {
+          const lang = node.getAttribute('data-lang') || '';
+          const code = node.querySelector('code').textContent.trim();
+          return '\n```' + lang + '\n' + code + '\n```\n';
+        }
+      });
+
+      return td.turndown(html).replace(/\n{3,}/g, '\n\n').trim();
+    }
+
+    function syncPreviewToSource() {
+      clearTimeout(previewEditDebounce);
+      const pv = document.getElementById('ed-preview');
+      const src = document.getElementById('ed-source');
+      if (!pv || !src) return;
+      previewEditInProgress = true;
+      src.value = htmlToMarkdown(pv.innerHTML);
+      updateWordCount();
+      saveDraft();
+      previewEditInProgress = false;
+      previewDirty = false;
     }
 
     // ══════════════════════════════════
@@ -1569,6 +1653,7 @@ print(&quot;hello&quot;)
       const title = document.getElementById('ed-title').value.trim();
       const cat = document.getElementById('ed-category').value;
       const rawTags = document.getElementById('ed-tags').value.trim();
+      if (previewDirty) syncPreviewToSource();
       const content = document.getElementById('ed-source').value.trim();
 
       if (!title) { alert('请填写标题'); document.getElementById('ed-title').focus(); return; }
