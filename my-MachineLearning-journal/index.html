@@ -689,7 +689,6 @@
     <div class="editor-body mode-split" id="editor-body" style="--editor-split:50%;">
       <!-- Left: Editor -->
       <div class="ed-pane" id="ed-pane-edit">
-        <div class="ed-label">✎ 编辑区 &nbsp;<span style="color:var(--text3);font-weight:400;">— 支持 Ctrl+V 粘贴图片 / 上方 📎 上传附件</span></div>
         <div class="md-toolbar" id="md-toolbar">
           <div class="md-group">
             <button type="button" class="md-btn" title="加粗" onclick="mdWrap('**','**','加粗文字')"><b>B</b></button>
@@ -1748,13 +1747,15 @@ print(&quot;hello&quot;)
         toolbar.style.position = 'fixed'; toolbar.style.top = '0'; toolbar.style.left = '0'; toolbar.style.right = '0'; toolbar.style.zIndex = '203';
         btn.textContent = '⬚ 退出全屏';
         // Hide sidebar labels in fullscreen
-        paneEdit.querySelector('.ed-label').style.display = 'none';
+        const editLabel = paneEdit.querySelector('.ed-label');
+        if (editLabel) editLabel.style.display = 'none';
         panePrev.querySelector('.ed-label').style.display = 'none';
       } else {
         body.style.position = ''; body.style.inset = ''; body.style.top = '';
         toolbar.style.position = ''; toolbar.style.top = ''; toolbar.style.left = ''; toolbar.style.right = ''; toolbar.style.zIndex = '';
         btn.textContent = '⛶ 全屏';
-        paneEdit.querySelector('.ed-label').style.display = '';
+        const editLabel2 = paneEdit.querySelector('.ed-label');
+        if (editLabel2) editLabel2.style.display = '';
         panePrev.querySelector('.ed-label').style.display = '';
       }
     }
@@ -1767,7 +1768,8 @@ print(&quot;hello&quot;)
       body.style.position = ''; body.style.inset = '';
       toolbar.style.position = ''; toolbar.style.top = ''; toolbar.style.left = '';
       btn.textContent = '⛶ 全屏';
-      document.getElementById('ed-pane-edit').querySelector('.ed-label').style.display = '';
+      const editLabel = document.getElementById('ed-pane-edit').querySelector('.ed-label');
+      if (editLabel) editLabel.style.display = '';
       document.getElementById('ed-pane-prev').querySelector('.ed-label').style.display = '';
     }
 
